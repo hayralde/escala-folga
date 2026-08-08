@@ -11,7 +11,6 @@
     body { font-family: 'Inter', system-ui, sans-serif; }
     .folga-cell { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 700; }
     .trabalho-cell { background: #f8fafc; }
-    .day-header { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); min-height: 60px; }
     .calendar-day { transition: all 0.15s ease; }
     .calendar-day:hover { transform: scale(1.05); }
     .fade-in { animation: fadeIn 0.3s ease; }
@@ -95,21 +94,11 @@
 
     <nav id="admin-nav" class="hidden bg-slate-800 text-white">
       <div class="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto">
-        <button onclick="showSection('admin-dashboard')" data-section="admin-dashboard" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition">
-          <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
-        </button>
-        <button onclick="showSection('admin-escala')" data-section="admin-escala" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition">
-          <i class="fas fa-table mr-1"></i> Escala Completa
-        </button>
-        <button onclick="showSection('admin-usuarios')" data-section="admin-usuarios" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition">
-          <i class="fas fa-users mr-1"></i> Colaboradores
-        </button>
-        <button onclick="showSection('admin-meses')" data-section="admin-meses" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition">
-          <i class="fas fa-calendar-plus mr-1"></i> Meses
-        </button>
-        <button onclick="showSection('admin-config')" data-section="admin-config" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition">
-          <i class="fas fa-cog mr-1"></i> Configurações
-        </button>
+        <button onclick="showSection('admin-dashboard')" data-section="admin-dashboard" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-tachometer-alt mr-1"></i> Dashboard</button>
+        <button onclick="showSection('admin-escala')" data-section="admin-escala" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-table mr-1"></i> Escala Completa</button>
+        <button onclick="showSection('admin-usuarios')" data-section="admin-usuarios" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-users mr-1"></i> Colaboradores</button>
+        <button onclick="showSection('admin-meses')" data-section="admin-meses" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-calendar-plus mr-1"></i> Meses</button>
+        <button onclick="showSection('admin-config')" data-section="admin-config" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-cog mr-1"></i> Configurações</button>
       </div>
     </nav>
 
@@ -126,23 +115,12 @@
           </div>
         </div>
         <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500 mb-1">Total de Folgas</div>
-            <div class="text-3xl font-bold text-emerald-600" id="stat-folgas">0</div>
-          </div>
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500 mb-1">Dias de Trabalho</div>
-            <div class="text-3xl font-bold text-blue-600" id="stat-trabalho">0</div>
-          </div>
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500 mb-1">Próxima Folga</div>
-            <div class="text-xl font-bold text-slate-700" id="stat-proxima">—</div>
-          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500 mb-1">Total de Folgas</div><div class="text-3xl font-bold text-emerald-600" id="stat-folgas">0</div></div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500 mb-1">Dias de Trabalho</div><div class="text-3xl font-bold text-blue-600" id="stat-trabalho">0</div></div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500 mb-1">Próxima Folga</div><div class="text-xl font-bold text-slate-700" id="stat-proxima">—</div></div>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-          <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <i class="fas fa-calendar text-blue-500"></i> Calendário do Mês
-          </h3>
+          <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><i class="fas fa-calendar text-blue-500"></i> Calendário do Mês</h3>
           <div id="user-calendar" class="grid grid-cols-7"></div>
           <div class="mt-4 flex gap-4 text-sm justify-center">
             <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded folga-cell"></span> Folga</span>
@@ -158,38 +136,18 @@
       <section id="section-admin-dashboard" class="hidden fade-in">
         <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500">Colaboradores</div>
-            <div class="text-3xl font-bold text-blue-600" id="dash-users">0</div>
-          </div>
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500">Meses Cadastrados</div>
-            <div class="text-3xl font-bold text-indigo-600" id="dash-meses">0</div>
-          </div>
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500">Mês Ativo</div>
-            <div class="text-xl font-bold text-slate-700 mt-1" id="dash-mes-ativo">—</div>
-          </div>
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-            <div class="text-sm text-slate-500">Total Folgas (mês)</div>
-            <div class="text-3xl font-bold text-emerald-600" id="dash-folgas">0</div>
-          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500">Colaboradores</div><div class="text-3xl font-bold text-blue-600" id="dash-users">0</div></div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500">Meses Cadastrados</div><div class="text-3xl font-bold text-indigo-600" id="dash-meses">0</div></div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500">Mês Ativo</div><div class="text-xl font-bold text-slate-700 mt-1" id="dash-mes-ativo">—</div></div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200"><div class="text-sm text-slate-500">Total Folgas (mês)</div><div class="text-3xl font-bold text-emerald-600" id="dash-folgas">0</div></div>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
           <h3 class="font-semibold mb-3">Ações Rápidas</h3>
           <div class="flex flex-wrap gap-3">
-            <button onclick="showSection('admin-escala')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-              <i class="fas fa-edit mr-1"></i> Editar Escala
-            </button>
-            <button onclick="showSection('admin-usuarios')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
-              <i class="fas fa-user-plus mr-1"></i> Gerenciar Colaboradores
-            </button>
-            <button onclick="exportData()" class="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700">
-              <i class="fas fa-download mr-1"></i> Exportar Dados
-            </button>
-            <button onclick="document.getElementById('import-file').click()" class="px-4 py-2 bg-slate-500 text-white rounded-lg text-sm hover:bg-slate-600">
-              <i class="fas fa-upload mr-1"></i> Importar Dados
-            </button>
+            <button onclick="showSection('admin-escala')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-edit mr-1"></i> Editar Escala</button>
+            <button onclick="showSection('admin-usuarios')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"><i class="fas fa-user-plus mr-1"></i> Gerenciar Colaboradores</button>
+            <button onclick="exportData()" class="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700"><i class="fas fa-download mr-1"></i> Exportar Dados</button>
+            <button onclick="document.getElementById('import-file').click()" class="px-4 py-2 bg-slate-500 text-white rounded-lg text-sm hover:bg-slate-600"><i class="fas fa-upload mr-1"></i> Importar Dados</button>
             <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)" />
           </div>
         </div>
@@ -200,48 +158,34 @@
           <h2 class="text-2xl font-bold">Escala Completa</h2>
           <div class="flex items-center gap-2 flex-wrap">
             <select id="admin-mes-select" onchange="renderAdminEscala()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm"></select>
-            <button onclick="toggleEditMode()" id="btn-edit-mode" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600">
-              <i class="fas fa-pen mr-1"></i> Modo Edição
-            </button>
-            <button onclick="saveEscala()" id="btn-save-escala" class="hidden px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">
-              <i class="fas fa-save mr-1"></i> Salvar
-            </button>
+            <button onclick="toggleEditMode()" id="btn-edit-mode" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600"><i class="fas fa-pen mr-1"></i> Modo Edição</button>
+            <button onclick="saveEscala()" id="btn-save-escala" class="hidden px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"><i class="fas fa-save mr-1"></i> Salvar</button>
           </div>
         </div>
         <div class="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg p-3 mb-4 hidden" id="edit-hint">
           <i class="fas fa-info-circle mr-1"></i>
-          <strong>Clique</strong> em qualquer dia → a folga daquele colaborador é reprogramada automaticamente a cada 6 dias a partir desse dia (as antigas somem).
-          <br><strong>Shift + clique</strong> → limpa todas as folgas da pessoa. Depois clique em <strong>Salvar</strong>.
+          <strong>Clique</strong> em qualquer dia → a folga daquele colaborador é reprogramada automaticamente a cada 6 dias.
+          <br><strong>Shift + clique</strong> → limpa todas as folgas. Depois clique em <strong>Salvar</strong>.
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="table-scroll">
             <table class="w-full text-sm" id="admin-table">
-              <thead class="sticky-header bg-slate-100">
-                <tr id="admin-table-header"></tr>
-              </thead>
+              <thead class="sticky-header bg-slate-100"><tr id="admin-table-header"></tr></thead>
               <tbody id="admin-table-body"></tbody>
             </table>
           </div>
         </div>
-        <p class="text-xs text-slate-400 mt-2">Células verdes = Folga (F). No modo edição: clique reprograma o ciclo de 6 dias; Shift+clique limpa todas as folgas da pessoa.</p>
+        <p class="text-xs text-slate-400 mt-2">Células verdes = Folga (F).</p>
       </section>
 
       <section id="section-admin-usuarios" class="hidden fade-in">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-2xl font-bold">Colaboradores</h2>
-          <button onclick="openUserModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-            <i class="fas fa-user-plus mr-1"></i> Novo Colaborador
-          </button>
+          <button onclick="openUserModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-user-plus mr-1"></i> Novo Colaborador</button>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <table class="w-full text-sm">
-            <thead class="bg-slate-100">
-              <tr>
-                <th class="text-left px-4 py-3 font-semibold">Matrícula</th>
-                <th class="text-left px-4 py-3 font-semibold">Nome</th>
-                <th class="text-left px-4 py-3 font-semibold">Ações</th>
-              </tr>
-            </thead>
+            <thead class="bg-slate-100"><tr><th class="text-left px-4 py-3 font-semibold">Matrícula</th><th class="text-left px-4 py-3 font-semibold">Nome</th><th class="text-left px-4 py-3 font-semibold">Ações</th></tr></thead>
             <tbody id="users-table-body"></tbody>
           </table>
         </div>
@@ -250,9 +194,7 @@
       <section id="section-admin-meses" class="hidden fade-in">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-2xl font-bold">Gerenciar Meses</h2>
-          <button onclick="openMesModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-            <i class="fas fa-calendar-plus mr-1"></i> Novo Mês
-          </button>
+          <button onclick="openMesModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-calendar-plus mr-1"></i> Novo Mês</button>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="meses-grid"></div>
       </section>
@@ -271,13 +213,9 @@
             <label class="block text-sm font-medium mb-1">Nome do Setor / Título</label>
             <input id="config-titulo" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
           </div>
-          <button onclick="saveConfig()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">
-            <i class="fas fa-save mr-1"></i> Salvar Configurações
-          </button>
+          <button onclick="saveConfig()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm"><i class="fas fa-save mr-1"></i> Salvar Configurações</button>
           <hr class="my-4" />
-          <button onclick="resetAllData()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
-            <i class="fas fa-trash-alt mr-1"></i> Resetar Todos os Dados
-          </button>
+          <button onclick="resetAllData()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"><i class="fas fa-trash-alt mr-1"></i> Resetar Todos os Dados</button>
         </div>
       </section>
     </main>
@@ -292,21 +230,12 @@
       <h3 class="text-xl font-bold mb-4" id="modal-user-title">Novo Colaborador</h3>
       <input type="hidden" id="edit-user-id" />
       <div class="space-y-3">
-        <div>
-          <label class="block text-sm font-medium mb-1">Matrícula *</label>
-          <input id="form-matricula" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Nome Completo *</label>
-          <input id="form-nome" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-        </div>
+        <div><label class="block text-sm font-medium mb-1">Matrícula *</label><input id="form-matricula" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
+        <div><label class="block text-sm font-medium mb-1">Nome Completo *</label><input id="form-nome" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
         <div>
           <label class="block text-sm font-medium mb-1">Dia da folga (âncora)</label>
           <input id="form-dia-folga" type="number" min="1" max="31" placeholder="Ex: 4" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-          <p class="text-xs text-slate-400 mt-1">
-            Informe um dia (1–31). O sistema marca automaticamente as folgas a cada 6 dias a partir dele
-            (ex: dia 4 → 4, 10, 16, 22, 28). Deixe em branco para não gerar escala ainda.
-          </p>
+          <p class="text-xs text-slate-400 mt-1">Informe um dia (1–31). Folgas a cada 6 dias. Deixe em branco para não gerar escala ainda.</p>
         </div>
       </div>
       <div class="flex gap-2 mt-6">
@@ -320,20 +249,9 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in">
       <h3 class="text-xl font-bold mb-4">Novo Mês de Escala</h3>
       <div class="space-y-3">
-        <div>
-          <label class="block text-sm font-medium mb-1">Ano-Mês (YYYY-MM)</label>
-          <input id="form-mes-key" type="month" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Título / Descrição</label>
-          <input id="form-mes-titulo" type="text" placeholder="Ex: Escala de Folga - Agosto 2026" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Copiar de</label>
-          <select id="form-mes-copy" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">— Em branco —</option>
-          </select>
-        </div>
+        <div><label class="block text-sm font-medium mb-1">Ano-Mês (YYYY-MM)</label><input id="form-mes-key" type="month" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
+        <div><label class="block text-sm font-medium mb-1">Título / Descrição</label><input id="form-mes-titulo" type="text" placeholder="Ex: Escala de Folga - Agosto 2026" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
+        <div><label class="block text-sm font-medium mb-1">Copiar de</label><select id="form-mes-copy" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"><option value="">— Em branco —</option></select></div>
       </div>
       <div class="flex gap-2 mt-6">
         <button onclick="closeMesModal()" class="flex-1 py-2 border border-slate-300 rounded-lg text-sm">Cancelar</button>
@@ -344,6 +262,8 @@
 
   <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg text-sm fade-in"></div>
 
-<script src="app.js"></script>
+<script src="app1.js"></script>
+<script src="app2.js"></script>
+<script src="app3.js"></script>
 </body>
 </html>
