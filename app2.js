@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.2.4';
+const APP_VERSION = 'v1.2.5';
 
 function saveDB() {
   localStorage.setItem('portal_escala_folga', JSON.stringify(DB));
