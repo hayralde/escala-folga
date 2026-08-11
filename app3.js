@@ -203,7 +203,7 @@ function changeAdminPassword() {
 function saveConfig() {
   DB.config.titulo = document.getElementById('config-titulo').value.trim() || 'Elétrica & Cogeração';
   saveDB();
-  document.getElementById('header-subtitle').textContent = DB.config.titulo;
+  document.getElementById('header-subtitle').innerHTML = DB.config.titulo + ' <span class="text-slate-400">' + APP_VERSION + '</span>';
   toast('Configurações salvas!');
 }
 

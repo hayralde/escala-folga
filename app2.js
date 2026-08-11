@@ -1,3 +1,4 @@
+const APP_VERSION = 'v1.2.4';
 
 function saveDB() {
   localStorage.setItem('portal_escala_folga', JSON.stringify(DB));
@@ -53,7 +54,7 @@ function doLogout() {
 }
 
 function renderApp() {
-  document.getElementById('header-subtitle').textContent = DB.config.titulo || 'Elétrica & Cogeração';
+  document.getElementById('header-subtitle').innerHTML = (DB.config.titulo || 'Elétrica & Cogeração') + ' <span class="text-slate-400">' + APP_VERSION + '</span>';
   if (currentUser.type === 'admin') {
     document.getElementById('user-badge').innerHTML = '<i class="fas fa-shield-alt text-amber-500 mr-1"></i> Administrador';
     document.getElementById('admin-nav').classList.remove('hidden');
