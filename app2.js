@@ -1,7 +1,16 @@
-const APP_VERSION = 'v1.3.0';
+const APP_VERSION = 'v1.4.0';
 
+let saveQueue = Promise.resolve();
+
+// Grava no Supabase (só admin logado). As gravações são enfileiradas para manter a ordem.
 function saveDB() {
-  localStorage.setItem('portal_escala_folga', JSON.stringify(DB));
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(DB)); } catch (e) {}
+  if (!adminSenha) return Promise.resolve(false);
+  const snapshot = JSON.parse(JSON.stringify(DB));
+  saveQueue = saveQueue
+    .then(() => sbRpc('escala_folga_save', { p_password: adminSenha, p_data: snapshot }))
+    .then(() => true, e => { toast('Erro ao salvar no servidor: ' + e.message, true); return false; });
+  return saveQueue;
 }
 
 function setLoginType(type) {
@@ -17,16 +26,20 @@ function setLoginType(type) {
   document.getElementById('login-error').classList.add('hidden');
 }
 
-function doLogin() {
+async function doLogin() {
   const err = document.getElementById('login-error');
   err.classList.add('hidden');
+  const showErr = msg => { err.textContent = msg; err.classList.remove('hidden'); };
+  if (!DB) { showErr('Carregando dados, tente novamente em instantes.'); return; }
   if (loginType === 'admin') {
     const senha = document.getElementById('input-senha').value;
-    if (senha !== DB.config.adminPassword) {
-      err.textContent = 'Senha incorreta.';
-      err.classList.remove('hidden');
-      return;
-    }
+    if (dbOffline) await loadDB();
+    if (dbOffline) { showErr('Sem conexão com o servidor. O acesso de administrador requer internet.'); return; }
+    let ok = false;
+    try { ok = await sbRpc('escala_folga_check', { p_password: senha }); }
+    catch (e) { showErr('Erro ao conectar: ' + e.message); return; }
+    if (!ok) { showErr('Senha incorreta.'); return; }
+    adminSenha = senha;
     currentUser = { type: 'admin' };
   } else {
     const mat = document.getElementById('input-matricula').value.trim();
@@ -45,6 +58,7 @@ function doLogin() {
 
 function doLogout() {
   currentUser = null;
+  adminSenha = null;
   editMode = false;
   document.getElementById('app').classList.add('hidden');
   document.getElementById('login-screen').classList.remove('hidden');
@@ -182,7 +196,8 @@ function renderAdminEscala() {
 
 function toggleEditMode() {
   editMode = !editMode;
-  if (!editMode) loadDB();
+  // Cancelar edição: descarta mudanças não salvas recarregando do servidor
+  if (!editMode) { loadDB().then(renderAdminEscala); return; }
   renderAdminEscala();
 }
 

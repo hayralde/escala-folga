@@ -2,12 +2,12 @@
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 1.3.0
+**Versão:** 1.4.0
 
 ## Acesso
 
 - **Colaborador:** informe a matrícula
-- **Administrador:** senha padrão `admin123` (altere em Configurações)
+- **Administrador:** senha definida no banco (altere em Configurações)
 
 ## Funcionalidades
 
@@ -23,6 +23,12 @@ Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 2. Source: branch `main` / folder `/ (root)`
 3. Acesse: https://hayralde.github.io/escala-folga/
 
-## Arquivo
+## Dados
 
-O portal é um único arquivo HTML (`index.html`) com dados em `localStorage` do navegador.
+Os dados ficam no Supabase (tabela `escala_folga`), compartilhados por todos os acessos:
+
+- Leitura pública (colaboradores consultam pela matrícula)
+- Gravação apenas pelo administrador — a senha é conferida no banco (hash bcrypt)
+- Sem conexão, o portal mostra a última cópia salva no aparelho (somente leitura)
+
+Estrutura do banco: `supabase/escala_folga.sql`.

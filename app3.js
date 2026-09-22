@@ -1,6 +1,6 @@
 
-function saveEscala() {
-  saveDB();
+async function saveEscala() {
+  if (!(await saveDB())) return;
   editMode = false;
   toast('Escala salva com sucesso!');
   renderAdminEscala();
@@ -200,11 +200,13 @@ function renderConfig() {
   document.getElementById('config-titulo').value = DB.config.titulo || '';
 }
 
-function changeAdminPassword() {
+async function changeAdminPassword() {
   const nova = document.getElementById('config-senha').value;
   if (!nova || nova.length < 4) { toast('Senha deve ter ao menos 4 caracteres', true); return; }
-  DB.config.adminPassword = nova;
-  saveDB();
+  try {
+    await sbRpc('escala_folga_change_password', { p_old: adminSenha, p_new: nova });
+  } catch (e) { toast('Erro ao alterar senha: ' + e.message, true); return; }
+  adminSenha = nova;
   toast('Senha alterada!');
   document.getElementById('config-senha').value = '';
 }
@@ -218,8 +220,8 @@ function saveConfig() {
 
 function resetAllData() {
   if (!confirm('Isso apagará TODOS os dados e restaurará a escala original de Setembro/2026. Continuar?')) return;
-  localStorage.removeItem('portal_escala_folga');
-  loadDB();
+  DB = JSON.parse(JSON.stringify(INITIAL_DATA));
+  saveDB();
   toast('Dados resetados');
   renderApp();
 }
@@ -241,6 +243,7 @@ function importData(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (!data.users || !data.schedules || !data.config) throw new Error('Formato inválido');
+      delete data.config.adminPassword;
       DB = data;
       saveDB();
       toast('Dados importados com sucesso!');
@@ -261,6 +264,8 @@ function toast(msg, isError = false) {
   setTimeout(() => t.classList.add('hidden'), 3000);
 }
 
-loadDB();
+loadDB().then(() => {
+  if (dbOffline) toast('Sem conexão com o servidor — exibindo a última cópia salva neste aparelho', true);
+});
 document.getElementById('input-matricula').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('input-senha').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
