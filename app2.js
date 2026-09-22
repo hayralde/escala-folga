@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.2.6';
+const APP_VERSION = 'v1.2.7';
 
 function saveDB() {
   localStorage.setItem('portal_escala_folga', JSON.stringify(DB));
@@ -198,9 +198,8 @@ function toggleCell(mesKey, matricula, dayIdx, event) {
     toast('Folgas de ' + (DB.users.find(u => u.matricula === matricula)?.nome?.split(' ')[0] || matricula) + ' limpas');
     return;
   }
-  const CICLO = 6;
-  const residual = dayIdx % CICLO;
-  for (let i = 0; i < diasNoMes; i++) arr[i] = (i % CICLO === residual) ? 'F' : '';
+  const residual = cycleDay(mesKey, dayIdx);
+  for (let i = 0; i < diasNoMes; i++) arr[i] = (cycleDay(mesKey, i) === residual) ? 'F' : '';
   const nomeCurto = (DB.users.find(u => u.matricula === matricula)?.nome || matricula).split(' ')[0];
   const diasMarcados = arr.map((v, i) => v === 'F' ? (i + 1) : null).filter(Boolean);
   toast(`${nomeCurto}: folgas reprogramadas → dias ${diasMarcados.join(', ')}`);

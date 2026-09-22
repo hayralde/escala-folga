@@ -2,7 +2,7 @@
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 1.2.0
+**Versão:** 1.2.7
 
 ## Acesso
 
