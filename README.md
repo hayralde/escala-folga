@@ -2,7 +2,7 @@
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 1.4.2
+**Versão:** 1.5.0
 
 ## Acesso
 
@@ -22,6 +22,10 @@ Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 1. No repositório, vá em **Settings → Pages**
 2. Source: branch `main` / folder `/ (root)`
 3. Acesse: https://hayralde.github.io/escala-folga/
+
+## Instalar como app
+
+No Android/Chrome/Edge aparece o botão **Instalar app** (tela de login e cabeçalho). No iPhone: Safari → Compartilhar → **Adicionar à Tela de Início**.
 
 ## Dados
 
