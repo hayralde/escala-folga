@@ -33,8 +33,7 @@ function openUserModal(matricula) {
     document.getElementById('form-matricula').disabled = true;
     document.getElementById('form-nome').value = u.nome;
     document.getElementById('form-ciclo').value = u.ciclo || CICLO_PADRAO;
-    const mesAtivo = DB.config.mesAtivo;
-    const dias = (mesAtivo && DB.schedules[mesAtivo]?.data[matricula]) || [];
+    const dias = DB.schedules[anchorMes()]?.data[matricula] || [];
     const primeira = dias.findIndex(d => d === 'F');
     diaInput.value = primeira >= 0 ? (primeira + 1) : '';
   } else {
@@ -53,9 +52,9 @@ function closeUserModal() {
   document.getElementById('modal-user').classList.remove('flex');
 }
 
-// O dia-âncora é um dia do mês ativo; o ciclo continua nos demais meses
+// O dia-âncora é um dia do mês atual; o ciclo continua nos demais meses
 function anchorMes() {
-  return DB.config.mesAtivo || Object.keys(DB.schedules).sort()[0] || '2026-09';
+  return mesPadrao();
 }
 
 function applyCycleToUser(matricula, diaAncora) {
@@ -121,13 +120,11 @@ function renderMeses() {
   grid.innerHTML = keys.map(k => {
     const s = DB.schedules[k];
     const [y, m] = k.split('-');
-    const isAtivo = k === DB.config.mesAtivo;
     const totalF = Object.values(s.data).reduce((acc, arr) => acc + arr.filter(x => x === 'F').length, 0);
-    return `<div class="bg-white rounded-xl border ${isAtivo ? 'border-blue-400 ring-2 ring-blue-100' : 'border-slate-200'} p-5 shadow-sm">
-        <div class="flex items-start justify-between mb-2"><div><div class="font-bold text-lg">${MONTH_NAMES[parseInt(m)-1]} ${y}</div><div class="text-xs text-slate-500 mt-0.5">${s.titulo || ''}</div></div>
-          ${isAtivo ? '<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Ativo</span>' : ''}</div>
+    return `<div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="mb-2"><div class="font-bold text-lg">${MONTH_NAMES[parseInt(m)-1]} ${y}</div><div class="text-xs text-slate-500 mt-0.5">${s.titulo || ''}</div></div>
         <div class="text-sm text-slate-600 mb-3">${Object.keys(s.data).length} colaboradores • ${totalF} folgas</div>
-        <div class="flex gap-2">${!isAtivo ? `<button onclick="setMesAtivo('${k}')" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">Definir Ativo</button>` : ''}
+        <div class="flex gap-2">
           <button onclick="deleteMes('${k}')" class="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100">Excluir</button></div></div>`;
   }).join('') || '<p class="text-slate-400">Nenhum mês cadastrado</p>';
 }
@@ -171,25 +168,16 @@ function saveMes() {
     }
   });
   DB.schedules[key] = { titulo, diasNoMes, data };
-  if (!DB.config.mesAtivo) DB.config.mesAtivo = key;
   saveDB();
   closeMesModal();
   renderMeses();
   toast('Mês criado!');
 }
 
-function setMesAtivo(key) {
-  DB.config.mesAtivo = key;
-  saveDB();
-  renderMeses();
-  toast('Mês ativo atualizado');
-}
-
 function deleteMes(key) {
   if (Object.keys(DB.schedules).length <= 1) { toast('É necessário manter pelo menos um mês', true); return; }
   if (!confirm('Excluir o mês ' + key + '?')) return;
   delete DB.schedules[key];
-  if (DB.config.mesAtivo === key) DB.config.mesAtivo = Object.keys(DB.schedules).sort().reverse()[0];
   saveDB();
   renderMeses();
   toast('Mês excluído');

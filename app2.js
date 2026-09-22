@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.4.0';
+const APP_VERSION = 'v1.4.1';
 
 let saveQueue = Promise.resolve();
 
@@ -102,17 +102,19 @@ function showSection(id) {
 function fillMesSelect(selectId) {
   const sel = document.getElementById(selectId);
   const keys = Object.keys(DB.schedules).sort().reverse();
+  // Mantém o mês escolhido pelo usuário; só usa o padrão na primeira vez
+  const atual = keys.includes(sel.value) ? sel.value : mesPadrao();
   sel.innerHTML = keys.map(k => {
     const [y, m] = k.split('-');
     const label = MONTH_NAMES[parseInt(m)-1] + ' ' + y;
-    const selected = k === DB.config.mesAtivo ? 'selected' : '';
+    const selected = k === atual ? 'selected' : '';
     return `<option value="${k}" ${selected}>${label}</option>`;
   }).join('');
 }
 
 function renderUserEscala() {
   fillMesSelect('user-mes-select');
-  const mesKey = document.getElementById('user-mes-select').value || DB.config.mesAtivo;
+  const mesKey = document.getElementById('user-mes-select').value || mesPadrao();
   const sched = DB.schedules[mesKey];
   if (!sched) return;
   const [year, month] = mesKey.split('-').map(Number);
@@ -150,7 +152,7 @@ function renderUserEscala() {
 function renderDashboard() {
   document.getElementById('dash-users').textContent = DB.users.length;
   document.getElementById('dash-meses').textContent = Object.keys(DB.schedules).length;
-  const mes = DB.config.mesAtivo;
+  const mes = mesPadrao();
   if (mes && DB.schedules[mes]) {
     const [y, m] = mes.split('-');
     document.getElementById('dash-mes-ativo').textContent = MONTH_NAMES[parseInt(m)-1] + ' ' + y;
@@ -162,14 +164,14 @@ function renderDashboard() {
 
 function renderAdminEscala() {
   fillMesSelect('admin-mes-select');
-  const mesKey = document.getElementById('admin-mes-select').value || DB.config.mesAtivo;
+  const mesKey = document.getElementById('admin-mes-select').value || mesPadrao();
   const sched = DB.schedules[mesKey];
   if (!sched) {
     document.getElementById('admin-table-header').innerHTML = '';
     document.getElementById('admin-table-body').innerHTML = '<tr><td class="p-4 text-slate-400">Nenhuma escala neste mês</td></tr>';
     return;
   }
-  let th = `<th class="sticky-col px-3 py-2 text-left font-semibold text-xs whitespace-nowrap">Mat.</th><th class="sticky-col px-3 py-2 text-left font-semibold text-xs whitespace-nowrap" style="left:70px">Colaborador</th>`;
+  let th = `<th class="sticky-col col-mat px-3 py-2 text-left font-semibold text-xs whitespace-nowrap">Mat.</th><th class="sticky-col col-nome px-3 py-2 text-left font-semibold text-xs whitespace-nowrap">Colaborador</th>`;
   for (let d = 1; d <= sched.diasNoMes; d++) {
     th += `<th class="px-1 py-2 text-center font-semibold text-xs min-w-[28px]">${String(d).padStart(2,'0')}</th>`;
   }
@@ -178,7 +180,7 @@ function renderAdminEscala() {
   let body = '';
   sorted.forEach(u => {
     const dias = sched.data[u.matricula] || Array(sched.diasNoMes).fill('');
-    body += `<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="sticky-col px-3 py-1.5 font-mono text-xs text-slate-500">${u.matricula}</td><td class="sticky-col px-3 py-1.5 text-xs font-medium whitespace-nowrap max-w-[180px] truncate" style="left:70px" title="${u.nome}">${u.nome}</td>`;
+    body += `<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="sticky-col col-mat px-3 py-1.5 font-mono text-xs text-slate-500">${u.matricula}</td><td class="sticky-col col-nome px-3 py-1.5 text-xs font-medium whitespace-nowrap" title="${u.nome}">${u.nome}</td>`;
     for (let i = 0; i < sched.diasNoMes; i++) {
       const isF = dias[i] === 'F';
       const cls = isF ? 'folga-cell' : 'trabalho-cell';

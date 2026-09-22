@@ -17,6 +17,10 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .table-scroll { max-height: 70vh; overflow: auto; }
     .sticky-col { position: sticky; left: 0; z-index: 10; background: white; }
+    /* Larguras fixas: a coluna do nome fica exatamente após a matrícula, sem sobrepor o dia 01 */
+    .col-mat { left: 0; width: 56px; min-width: 56px; max-width: 56px; }
+    .col-nome { left: 56px; width: 200px; min-width: 200px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; box-shadow: inset -1px 0 #e2e8f0; }
+    thead .sticky-col { background: #f1f5f9; z-index: 30; }
     .sticky-header { position: sticky; top: 0; z-index: 20; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -48,7 +52,7 @@
           <i class="fas fa-calendar-check text-3xl"></i>
         </div>
         <h1 class="text-2xl font-bold">Portal de Escala de Folga</h1>
-        <p class="text-blue-100 text-sm mt-1">Elétrica & Cogeração · v1.4.0</p>
+        <p class="text-blue-100 text-sm mt-1">Elétrica & Cogeração · v1.4.1</p>
       </div>
       <div class="p-6 space-y-5">
         <div>
@@ -88,7 +92,7 @@
           </div>
           <div>
             <h1 class="font-bold text-slate-800 leading-tight">Escala de Folga</h1>
-            <p class="text-xs text-slate-500" id="header-subtitle">Elétrica & Cogeração <span class="text-slate-400">v1.4.0</span></p>
+            <p class="text-xs text-slate-500" id="header-subtitle">Elétrica & Cogeração <span class="text-slate-400">v1.4.1</span></p>
           </div>
         </div>
         <div class="flex items-center gap-3">
@@ -146,7 +150,7 @@
         <div id="admin-stats" class="mb-8">
           <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Colaboradores</div><div class="stat-value text-3xl font-bold text-blue-600" id="dash-users">0</div></div>
           <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Meses Cadastrados</div><div class="stat-value text-3xl font-bold text-indigo-600" id="dash-meses">0</div></div>
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Mês Ativo</div><div class="stat-value text-xl font-bold text-slate-700 mt-1" id="dash-mes-ativo">—</div></div>
+          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Mês Atual</div><div class="stat-value text-xl font-bold text-slate-700 mt-1" id="dash-mes-ativo">—</div></div>
           <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Total Folgas (mês)</div><div class="stat-value text-3xl font-bold text-emerald-600" id="dash-folgas">0</div></div>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
@@ -229,7 +233,7 @@
     </main>
 
     <footer class="text-center text-xs text-slate-400 py-4 border-t border-slate-200">
-      Portal de Escala de Folga • v1.4.0 • Dados sincronizados na nuvem
+      Portal de Escala de Folga • v1.4.1 • Dados sincronizados na nuvem
     </footer>
   </div>
 
@@ -243,7 +247,7 @@
         <div>
           <label class="block text-sm font-medium mb-1">Dia da folga (âncora)</label>
           <input id="form-dia-folga" type="number" min="1" max="31" placeholder="Ex: 4" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-          <p class="text-xs text-slate-400 mt-1">Informe um dia (1–31) do mês ativo. Deixe em branco para não gerar escala ainda.</p>
+          <p class="text-xs text-slate-400 mt-1">Informe um dia (1–31) do mês atual. Deixe em branco para não gerar escala ainda.</p>
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Ciclo de folga (dias)</label>
