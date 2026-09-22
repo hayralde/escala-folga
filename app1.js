@@ -4,7 +4,6 @@
 const INITIAL_DATA = {
   config: {
     titulo: "Elétrica & Cogeração",
-    mesAtivo: "2026-09",
     dataVersion: 3
   },
   users: [
@@ -103,6 +102,15 @@ let loginType = 'user';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// Mês exibido por padrão: o mês atual do calendário; se não houver escala, o cadastrado mais próximo
+function mesPadrao() {
+  const keys = Object.keys(DB.schedules).sort();
+  const now = new Date();
+  const atual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const anteriores = keys.filter(k => k <= atual);
+  return anteriores.length ? anteriores[anteriores.length - 1] : keys[0];
+}
 
 // Ciclo de folga contínuo entre meses: conta os dias a partir de 01/09/2026
 const CICLO_PADRAO = 6;

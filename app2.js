@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.4.0';
+const APP_VERSION = 'v1.4.1';
 
 let saveQueue = Promise.resolve();
 
@@ -102,17 +102,19 @@ function showSection(id) {
 function fillMesSelect(selectId) {
   const sel = document.getElementById(selectId);
   const keys = Object.keys(DB.schedules).sort().reverse();
+  // Mantém o mês escolhido pelo usuário; só usa o padrão na primeira vez
+  const atual = keys.includes(sel.value) ? sel.value : mesPadrao();
   sel.innerHTML = keys.map(k => {
     const [y, m] = k.split('-');
     const label = MONTH_NAMES[parseInt(m)-1] + ' ' + y;
-    const selected = k === DB.config.mesAtivo ? 'selected' : '';
+    const selected = k === atual ? 'selected' : '';
     return `<option value="${k}" ${selected}>${label}</option>`;
   }).join('');
 }
 
 function renderUserEscala() {
   fillMesSelect('user-mes-select');
-  const mesKey = document.getElementById('user-mes-select').value || DB.config.mesAtivo;
+  const mesKey = document.getElementById('user-mes-select').value || mesPadrao();
   const sched = DB.schedules[mesKey];
   if (!sched) return;
   const [year, month] = mesKey.split('-').map(Number);
@@ -150,7 +152,7 @@ function renderUserEscala() {
 function renderDashboard() {
   document.getElementById('dash-users').textContent = DB.users.length;
   document.getElementById('dash-meses').textContent = Object.keys(DB.schedules).length;
-  const mes = DB.config.mesAtivo;
+  const mes = mesPadrao();
   if (mes && DB.schedules[mes]) {
     const [y, m] = mes.split('-');
     document.getElementById('dash-mes-ativo').textContent = MONTH_NAMES[parseInt(m)-1] + ' ' + y;
@@ -162,7 +164,7 @@ function renderDashboard() {
 
 function renderAdminEscala() {
   fillMesSelect('admin-mes-select');
-  const mesKey = document.getElementById('admin-mes-select').value || DB.config.mesAtivo;
+  const mesKey = document.getElementById('admin-mes-select').value || mesPadrao();
   const sched = DB.schedules[mesKey];
   if (!sched) {
     document.getElementById('admin-table-header').innerHTML = '';
