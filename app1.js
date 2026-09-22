@@ -173,6 +173,8 @@ function loadDB() {
   if (raw) {
     try {
       DB = JSON.parse(raw);
+      // Versão de dados antiga: descarta tudo e recomeça dos dados iniciais
+      if ((DB.config?.dataVersion || 1) < INITIAL_DATA.config.dataVersion) throw new Error('reset');
       let updated = false;
       Object.keys(INITIAL_DATA.schedules).forEach(k => {
         if (!DB.schedules[k]) {
@@ -185,24 +187,6 @@ function loadDB() {
           updated = true;
         }
       });
-      // v2: Set–Dez/2026 regravados continuando o ciclo de Agosto
-      if ((DB.config.dataVersion || 1) < 2) {
-        const ago888 = DB.schedules['2026-08']?.data['888'];
-        if (ago888) ago888[28] = 'F';
-        ['2026-09', '2026-10', '2026-11', '2026-12'].forEach(k => {
-          if (!DB.schedules[k]) return;
-          const sched = DB.schedules[k] = JSON.parse(JSON.stringify(INITIAL_DATA.schedules[k]));
-          DB.users.forEach(u => {
-            if (sched.data[u.matricula]) return;
-            // colaborador cadastrado pelo admin: segue o ciclo dele em Agosto
-            const primeira = (DB.schedules['2026-08']?.data[u.matricula] || []).indexOf('F');
-            const residual = primeira >= 0 ? cycleDay('2026-08', primeira) : -1;
-            sched.data[u.matricula] = Array(sched.diasNoMes).fill('').map((_, i) => cycleDay(k, i) === residual ? 'F' : '');
-          });
-        });
-        DB.config.dataVersion = 2;
-        updated = true;
-      }
       if (updated) saveDB();
       return;
     } catch(e) {}
