@@ -32,6 +32,7 @@ function openUserModal(matricula) {
     document.getElementById('form-matricula').value = u.matricula;
     document.getElementById('form-matricula').disabled = true;
     document.getElementById('form-nome').value = u.nome;
+    document.getElementById('form-ciclo').value = u.ciclo || CICLO_PADRAO;
     const mesAtivo = DB.config.mesAtivo;
     const dias = (mesAtivo && DB.schedules[mesAtivo]?.data[matricula]) || [];
     const primeira = dias.findIndex(d => d === 'F');
@@ -42,6 +43,7 @@ function openUserModal(matricula) {
     document.getElementById('form-matricula').value = '';
     document.getElementById('form-matricula').disabled = false;
     document.getElementById('form-nome').value = '';
+    document.getElementById('form-ciclo').value = CICLO_PADRAO;
     diaInput.value = '';
   }
 }
@@ -53,16 +55,17 @@ function closeUserModal() {
 
 // O dia-âncora é um dia do mês ativo; o ciclo continua nos demais meses
 function anchorMes() {
-  return DB.config.mesAtivo || Object.keys(DB.schedules).sort()[0] || '2026-08';
+  return DB.config.mesAtivo || Object.keys(DB.schedules).sort()[0] || '2026-09';
 }
 
 function applyCycleToUser(matricula, diaAncora) {
-  const residual = cycleDay(anchorMes(), parseInt(diaAncora, 10) - 1);
+  const ciclo = userCiclo(matricula);
+  const residual = cycleDay(anchorMes(), parseInt(diaAncora, 10) - 1, ciclo);
   Object.keys(DB.schedules).forEach(k => {
     const sched = DB.schedules[k];
     if (!sched.data[matricula]) sched.data[matricula] = Array(sched.diasNoMes).fill('');
     for (let i = 0; i < sched.diasNoMes; i++) {
-      sched.data[matricula][i] = (cycleDay(k, i) === residual) ? 'F' : '';
+      sched.data[matricula][i] = (cycleDay(k, i, ciclo) === residual) ? 'F' : '';
     }
   });
 }
@@ -72,18 +75,20 @@ function saveUser() {
   const nome = document.getElementById('form-nome').value.trim().toUpperCase();
   const editId = document.getElementById('edit-user-id').value;
   const diaFolga = document.getElementById('form-dia-folga').value.trim();
+  const ciclo = parseInt(document.getElementById('form-ciclo').value, 10) || CICLO_PADRAO;
   if (!mat || !nome) { toast('Preencha matrícula e nome', true); return; }
+  if (ciclo < 2 || ciclo > 31) { toast('Ciclo deve ser entre 2 e 31 dias', true); return; }
   if (diaFolga) {
     const d = parseInt(diaFolga, 10);
     if (isNaN(d) || d < 1 || d > 31) { toast('Dia da folga deve ser entre 1 e 31', true); return; }
   }
   if (editId) {
     const u = DB.users.find(x => x.matricula === editId);
-    if (u) u.nome = nome;
+    if (u) { u.nome = nome; if (ciclo === CICLO_PADRAO) delete u.ciclo; else u.ciclo = ciclo; }
     if (diaFolga) applyCycleToUser(editId, diaFolga);
   } else {
     if (DB.users.some(x => x.matricula === mat)) { toast('Matrícula já existe', true); return; }
-    DB.users.push({ matricula: mat, nome });
+    DB.users.push(ciclo === CICLO_PADRAO ? { matricula: mat, nome } : { matricula: mat, nome, ciclo });
     Object.keys(DB.schedules).forEach(k => {
       DB.schedules[k].data[mat] = Array(DB.schedules[k].diasNoMes).fill('');
     });
@@ -156,10 +161,11 @@ function saveMes() {
   const data = {};
   DB.users.forEach(u => {
     if (copyFrom && DB.schedules[copyFrom]?.data[u.matricula]) {
-      // Continua o ciclo de 6 dias do mês de origem em vez de copiar dia a dia
+      // Continua o ciclo do colaborador a partir do mês de origem em vez de copiar dia a dia
+      const ciclo = userCiclo(u.matricula);
       const primeira = DB.schedules[copyFrom].data[u.matricula].indexOf('F');
-      const residual = primeira >= 0 ? cycleDay(copyFrom, primeira) : -1;
-      data[u.matricula] = Array(diasNoMes).fill('').map((_, i) => cycleDay(key, i) === residual ? 'F' : '');
+      const residual = primeira >= 0 ? cycleDay(copyFrom, primeira, ciclo) : -1;
+      data[u.matricula] = Array(diasNoMes).fill('').map((_, i) => cycleDay(key, i, ciclo) === residual ? 'F' : '');
     } else {
       data[u.matricula] = Array(diasNoMes).fill('');
     }
@@ -211,7 +217,7 @@ function saveConfig() {
 }
 
 function resetAllData() {
-  if (!confirm('Isso apagará TODOS os dados e restaurará a escala original de Agosto/2026. Continuar?')) return;
+  if (!confirm('Isso apagará TODOS os dados e restaurará a escala original de Setembro/2026. Continuar?')) return;
   localStorage.removeItem('portal_escala_folga');
   loadDB();
   toast('Dados resetados');

@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.2.7';
+const APP_VERSION = 'v1.3.0';
 
 function saveDB() {
   localStorage.setItem('portal_escala_folga', JSON.stringify(DB));
@@ -170,7 +170,7 @@ function renderAdminEscala() {
       const cls = isF ? 'folga-cell' : 'trabalho-cell';
       const click = editMode ? `onclick="toggleCell('${mesKey}','${u.matricula}',${i}, event)"` : '';
       const cursor = editMode ? 'cursor-pointer' : '';
-      body += `<td class="px-0.5 py-1 text-center ${cursor}" ${click} title="${editMode ? 'Clique: reprogramar ciclo 6 dias | Shift+clique: limpar' : ''}"><div class="w-6 h-6 mx-auto rounded flex items-center justify-center text-xs ${cls}">${isF ? 'F' : ''}</div></td>`;
+      body += `<td class="px-0.5 py-1 text-center ${cursor}" ${click} title="${editMode ? 'Clique: reprogramar ciclo | Shift+clique: limpar' : ''}"><div class="w-6 h-6 mx-auto rounded flex items-center justify-center text-xs ${cls}">${isF ? 'F' : ''}</div></td>`;
     }
     body += '</tr>';
   });
@@ -198,8 +198,9 @@ function toggleCell(mesKey, matricula, dayIdx, event) {
     toast('Folgas de ' + (DB.users.find(u => u.matricula === matricula)?.nome?.split(' ')[0] || matricula) + ' limpas');
     return;
   }
-  const residual = cycleDay(mesKey, dayIdx);
-  for (let i = 0; i < diasNoMes; i++) arr[i] = (cycleDay(mesKey, i) === residual) ? 'F' : '';
+  const ciclo = userCiclo(matricula);
+  const residual = cycleDay(mesKey, dayIdx, ciclo);
+  for (let i = 0; i < diasNoMes; i++) arr[i] = (cycleDay(mesKey, i, ciclo) === residual) ? 'F' : '';
   const nomeCurto = (DB.users.find(u => u.matricula === matricula)?.nome || matricula).split(' ')[0];
   const diasMarcados = arr.map((v, i) => v === 'F' ? (i + 1) : null).filter(Boolean);
   toast(`${nomeCurto}: folgas reprogramadas → dias ${diasMarcados.join(', ')}`);

@@ -2,7 +2,7 @@
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 1.2.7
+**Versão:** 1.3.0
 
 ## Acesso
 
@@ -12,9 +12,9 @@ Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 ## Funcionalidades
 
 - Consulta individual da escala (calendário)
-- Administração completa da escala (ciclo automático de 6 dias)
+- Administração completa da escala (ciclo automático por colaborador, padrão 6 dias)
 - Cadastro de colaboradores com dia-âncora de folga
-- Meses de Agosto a Dezembro/2026 pré-carregados
+- Meses de Setembro a Dezembro/2026 pré-carregados
 - Exportar / Importar backup JSON
 
 ## Publicação (GitHub Pages)
