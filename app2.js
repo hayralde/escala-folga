@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.4.1';
+const APP_VERSION = 'v1.4.2';
 
 let saveQueue = Promise.resolve();
 
