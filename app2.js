@@ -171,7 +171,7 @@ function renderAdminEscala() {
     document.getElementById('admin-table-body').innerHTML = '<tr><td class="p-4 text-slate-400">Nenhuma escala neste mês</td></tr>';
     return;
   }
-  let th = `<th class="sticky-col px-3 py-2 text-left font-semibold text-xs whitespace-nowrap">Mat.</th><th class="sticky-col px-3 py-2 text-left font-semibold text-xs whitespace-nowrap" style="left:70px">Colaborador</th>`;
+  let th = `<th class="sticky-col col-mat px-3 py-2 text-left font-semibold text-xs whitespace-nowrap">Mat.</th><th class="sticky-col col-nome px-3 py-2 text-left font-semibold text-xs whitespace-nowrap">Colaborador</th>`;
   for (let d = 1; d <= sched.diasNoMes; d++) {
     th += `<th class="px-1 py-2 text-center font-semibold text-xs min-w-[28px]">${String(d).padStart(2,'0')}</th>`;
   }
@@ -180,7 +180,7 @@ function renderAdminEscala() {
   let body = '';
   sorted.forEach(u => {
     const dias = sched.data[u.matricula] || Array(sched.diasNoMes).fill('');
-    body += `<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="sticky-col px-3 py-1.5 font-mono text-xs text-slate-500">${u.matricula}</td><td class="sticky-col px-3 py-1.5 text-xs font-medium whitespace-nowrap max-w-[180px] truncate" style="left:70px" title="${u.nome}">${u.nome}</td>`;
+    body += `<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="sticky-col col-mat px-3 py-1.5 font-mono text-xs text-slate-500">${u.matricula}</td><td class="sticky-col col-nome px-3 py-1.5 text-xs font-medium whitespace-nowrap" title="${u.nome}">${u.nome}</td>`;
     for (let i = 0; i < sched.diasNoMes; i++) {
       const isF = dias[i] === 'F';
       const cls = isF ? 'folga-cell' : 'trabalho-cell';
