@@ -3,7 +3,6 @@
 // ============================================================
 const INITIAL_DATA = {
   config: {
-    adminPassword: "admin123",
     titulo: "Elétrica & Cogeração",
     mesAtivo: "2026-09",
     dataVersion: 3
@@ -119,29 +118,40 @@ function cycleDay(mesKey, dayIdx, ciclo = CICLO_PADRAO) {
 // ============================================================
 // PERSISTÊNCIA
 // ============================================================
-function loadDB() {
-  const raw = localStorage.getItem('portal_escala_folga');
-  if (raw) {
-    try {
-      DB = JSON.parse(raw);
-      // Versão de dados antiga: descarta tudo e recomeça dos dados iniciais
-      if ((DB.config?.dataVersion || 1) < INITIAL_DATA.config.dataVersion) throw new Error('reset');
-      let updated = false;
-      Object.keys(INITIAL_DATA.schedules).forEach(k => {
-        if (!DB.schedules[k]) {
-          DB.schedules[k] = JSON.parse(JSON.stringify(INITIAL_DATA.schedules[k]));
-          DB.users.forEach(u => {
-            if (!DB.schedules[k].data[u.matricula]) {
-              DB.schedules[k].data[u.matricula] = Array(DB.schedules[k].diasNoMes).fill('');
-            }
-          });
-          updated = true;
-        }
-      });
-      if (updated) saveDB();
-      return;
-    } catch(e) {}
+const SUPABASE_URL = 'https://rsqbbcsaqmxfriwwbamv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_yCxFBZus6N2UHxY2W8Xdmw_Jo7SCFIx';
+const CACHE_KEY = 'portal_escala_folga';
+let adminSenha = null;   // guardada só em memória enquanto o admin está logado
+let dbOffline = false;   // true quando os dados vieram do cache local
+
+async function sbFetch(path, options = {}) {
+  const r = await fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json', ...(options.headers || {}) }
+  });
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e.message || ('HTTP ' + r.status));
   }
-  DB = JSON.parse(JSON.stringify(INITIAL_DATA));
-  saveDB();
+  return r.status === 204 ? null : r.json();
+}
+
+function sbRpc(fn, args) {
+  return sbFetch('/rest/v1/rpc/' + fn, { method: 'POST', body: JSON.stringify(args) });
+}
+
+async function loadDB() {
+  try {
+    const rows = await sbFetch('/rest/v1/escala_folga?id=eq.main&select=data');
+    if (!rows.length) throw new Error('sem dados');
+    DB = rows[0].data;
+    dbOffline = false;
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(DB)); } catch (e) {}
+  } catch (e) {
+    // Sem conexão com o banco: usa a última cópia do navegador (somente leitura)
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e2) {}
+    DB = (cached && cached.users && cached.schedules) ? cached : JSON.parse(JSON.stringify(INITIAL_DATA));
+    dbOffline = true;
+  }
 }
