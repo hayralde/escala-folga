@@ -51,14 +51,18 @@ function closeUserModal() {
   document.getElementById('modal-user').classList.remove('flex');
 }
 
+// O dia-âncora é um dia do mês ativo; o ciclo continua nos demais meses
+function anchorMes() {
+  return DB.config.mesAtivo || Object.keys(DB.schedules).sort()[0] || '2026-08';
+}
+
 function applyCycleToUser(matricula, diaAncora) {
-  const CICLO = 6;
-  const residual = (parseInt(diaAncora, 10) - 1) % CICLO;
+  const residual = cycleDay(anchorMes(), parseInt(diaAncora, 10) - 1);
   Object.keys(DB.schedules).forEach(k => {
     const sched = DB.schedules[k];
     if (!sched.data[matricula]) sched.data[matricula] = Array(sched.diasNoMes).fill('');
     for (let i = 0; i < sched.diasNoMes; i++) {
-      sched.data[matricula][i] = (i % CICLO === residual) ? 'F' : '';
+      sched.data[matricula][i] = (cycleDay(k, i) === residual) ? 'F' : '';
     }
   });
 }
@@ -89,12 +93,9 @@ function saveUser() {
   closeUserModal();
   renderUsers();
   if (diaFolga) {
-    const d = parseInt(diaFolga, 10);
-    const CICLO = 6;
-    const residual = (d - 1) % CICLO;
-    const dias = [];
-    for (let i = residual; i < 31; i += CICLO) dias.push(i + 1);
-    toast(`Colaborador salvo! Folgas geradas: ${dias.join(', ')}`);
+    const k = anchorMes();
+    const dias = (DB.schedules[k]?.data[editId || mat] || []).map((v, i) => v === 'F' ? i + 1 : null).filter(Boolean);
+    toast(`Colaborador salvo! Folgas em ${k}: ${dias.join(', ')}`);
   } else {
     toast('Colaborador salvo!');
   }
@@ -155,8 +156,10 @@ function saveMes() {
   const data = {};
   DB.users.forEach(u => {
     if (copyFrom && DB.schedules[copyFrom]?.data[u.matricula]) {
-      const src = DB.schedules[copyFrom].data[u.matricula];
-      data[u.matricula] = Array(diasNoMes).fill('').map((_, i) => src[i] || '');
+      // Continua o ciclo de 6 dias do mês de origem em vez de copiar dia a dia
+      const primeira = DB.schedules[copyFrom].data[u.matricula].indexOf('F');
+      const residual = primeira >= 0 ? cycleDay(copyFrom, primeira) : -1;
+      data[u.matricula] = Array(diasNoMes).fill('').map((_, i) => cycleDay(key, i) === residual ? 'F' : '');
     } else {
       data[u.matricula] = Array(diasNoMes).fill('');
     }
