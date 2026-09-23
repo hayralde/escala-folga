@@ -1,8 +1,10 @@
 # Portal de Escala de Folga
 
+Visual RRP Bioenergia (verde agro `#174A2B` + dourado milho `#D4A017`), com modo claro/escuro.
+
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 1.5.0
+**Versão:** 2.0.0
 
 ## Acesso
 
@@ -16,6 +18,9 @@ Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 - Cadastro de colaboradores com dia-âncora de folga
 - Meses de Setembro a Dezembro/2026 pré-carregados
 - Exportar / Importar backup JSON
+- Visual RRP Bioenergia, modo claro/escuro
+- Status do dia (folga hoje / trabalhando) e setor (Elétrica / Cogeração) por colaborador
+- Instalável como app (PWA) — opção "Instalar app" sempre disponível, com passo a passo por aparelho
 
 ## Publicação (GitHub Pages)
 

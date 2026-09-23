@@ -7,18 +7,22 @@ async function saveEscala() {
 }
 
 function renderUsers() {
-  const tbody = document.getElementById('users-table-body');
-  const sorted = [...DB.users].sort((a,b) => a.nome.localeCompare(b.nome));
-  tbody.innerHTML = sorted.map(u => `
-    <tr class="border-t border-slate-100 hover:bg-slate-50">
-      <td class="px-4 py-3 font-mono text-sm">${u.matricula}</td>
-      <td class="px-4 py-3 text-sm">${u.nome}</td>
-      <td class="px-4 py-3">
-        <button onclick="openUserModal('${u.matricula}')" class="text-blue-600 hover:text-blue-800 mr-3" title="Editar"><i class="fas fa-edit"></i></button>
-        <button onclick="deleteUser('${u.matricula}')" class="text-red-500 hover:text-red-700" title="Excluir"><i class="fas fa-trash-alt"></i></button>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Nenhum colaborador</td></tr>';
+  const sorted = [...DB.users].sort((a, b) => a.nome.localeCompare(b.nome));
+  document.getElementById('equipe-count').textContent = sorted.length + ' colaboradores';
+  document.getElementById('users-list').innerHTML = sorted.map(u => `
+    <button onclick="openUserModal('${esc(u.matricula)}')" class="card w-full p-4 flex items-center gap-3 text-left">
+      ${avatarHtml(u, 46, true)}
+      <span class="flex-1 min-w-0">
+        <span class="block font-semibold text-strong truncate">${esc(u.nome)}</span>
+        <span class="flex items-center gap-2 mt-1 text-xs muted">
+          <span class="chip-mat">${esc(u.matricula)}</span>
+          <span>${esc(u.setor || 'Sem setor')}</span>
+          <span>• ${userCiclo(u.matricula)} dias</span>
+        </span>
+      </span>
+      <span class="only-desktop">${statusHtml(u.matricula)}</span>
+      <i class="fas fa-chevron-right text-xs muted"></i>
+    </button>`).join('') || '<p class="text-sm muted">Nenhum colaborador</p>';
 }
 
 function openUserModal(matricula) {
@@ -27,22 +31,26 @@ function openUserModal(matricula) {
   const diaInput = document.getElementById('form-dia-folga');
   if (matricula) {
     const u = DB.users.find(x => x.matricula === matricula);
-    document.getElementById('modal-user-title').textContent = 'Editar Colaborador';
+    document.getElementById('modal-user-title').textContent = 'Editar colaborador';
     document.getElementById('edit-user-id').value = matricula;
     document.getElementById('form-matricula').value = u.matricula;
     document.getElementById('form-matricula').disabled = true;
     document.getElementById('form-nome').value = u.nome;
     document.getElementById('form-ciclo').value = u.ciclo || CICLO_PADRAO;
+    document.getElementById('form-setor').value = u.setor || '';
+    document.getElementById('btn-delete-user').classList.remove('hidden');
     const dias = DB.schedules[anchorMes()]?.data[matricula] || [];
     const primeira = dias.findIndex(d => d === 'F');
     diaInput.value = primeira >= 0 ? (primeira + 1) : '';
   } else {
-    document.getElementById('modal-user-title').textContent = 'Novo Colaborador';
+    document.getElementById('modal-user-title').textContent = 'Novo colaborador';
     document.getElementById('edit-user-id').value = '';
     document.getElementById('form-matricula').value = '';
     document.getElementById('form-matricula').disabled = false;
     document.getElementById('form-nome').value = '';
     document.getElementById('form-ciclo').value = CICLO_PADRAO;
+    document.getElementById('form-setor').value = '';
+    document.getElementById('btn-delete-user').classList.add('hidden');
     diaInput.value = '';
   }
 }
@@ -75,6 +83,7 @@ function saveUser() {
   const editId = document.getElementById('edit-user-id').value;
   const diaFolga = document.getElementById('form-dia-folga').value.trim();
   const ciclo = parseInt(document.getElementById('form-ciclo').value, 10) || CICLO_PADRAO;
+  const setor = document.getElementById('form-setor').value;
   if (!mat || !nome) { toast('Preencha matrícula e nome', true); return; }
   if (ciclo < 2 || ciclo > 31) { toast('Ciclo deve ser entre 2 e 31 dias', true); return; }
   if (diaFolga) {
@@ -83,11 +92,18 @@ function saveUser() {
   }
   if (editId) {
     const u = DB.users.find(x => x.matricula === editId);
-    if (u) { u.nome = nome; if (ciclo === CICLO_PADRAO) delete u.ciclo; else u.ciclo = ciclo; }
+    if (u) {
+      u.nome = nome;
+      if (ciclo === CICLO_PADRAO) delete u.ciclo; else u.ciclo = ciclo;
+      if (setor) u.setor = setor; else delete u.setor;
+    }
     if (diaFolga) applyCycleToUser(editId, diaFolga);
   } else {
     if (DB.users.some(x => x.matricula === mat)) { toast('Matrícula já existe', true); return; }
-    DB.users.push(ciclo === CICLO_PADRAO ? { matricula: mat, nome } : { matricula: mat, nome, ciclo });
+    const novo = { matricula: mat, nome };
+    if (ciclo !== CICLO_PADRAO) novo.ciclo = ciclo;
+    if (setor) novo.setor = setor;
+    DB.users.push(novo);
     Object.keys(DB.schedules).forEach(k => {
       DB.schedules[k].data[mat] = Array(DB.schedules[k].diasNoMes).fill('');
     });
@@ -110,23 +126,29 @@ function deleteUser(matricula) {
   DB.users = DB.users.filter(u => u.matricula !== matricula);
   Object.keys(DB.schedules).forEach(k => { delete DB.schedules[k].data[matricula]; });
   saveDB();
+  closeUserModal();
   renderUsers();
   toast('Colaborador excluído');
 }
 
 function renderMeses() {
-  const grid = document.getElementById('meses-grid');
   const keys = Object.keys(DB.schedules).sort().reverse();
-  grid.innerHTML = keys.map(k => {
+  const atual = mesPadrao();
+  document.getElementById('meses-grid').innerHTML = keys.map(k => {
     const s = DB.schedules[k];
-    const [y, m] = k.split('-');
     const totalF = Object.values(s.data).reduce((acc, arr) => acc + arr.filter(x => x === 'F').length, 0);
-    return `<div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-        <div class="mb-2"><div class="font-bold text-lg">${MONTH_NAMES[parseInt(m)-1]} ${y}</div><div class="text-xs text-slate-500 mt-0.5">${s.titulo || ''}</div></div>
-        <div class="text-sm text-slate-600 mb-3">${Object.keys(s.data).length} colaboradores • ${totalF} folgas</div>
-        <div class="flex gap-2">
-          <button onclick="deleteMes('${k}')" class="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100">Excluir</button></div></div>`;
-  }).join('') || '<p class="text-slate-400">Nenhum mês cadastrado</p>';
+    return `<div class="card p-4 flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl flex flex-col items-center justify-center shrink-0" style="background:${k === atual ? 'var(--green)' : 'var(--surface-2)'};color:${k === atual ? '#fff' : 'var(--text-strong)'}">
+          <span class="text-[10px] font-bold tracking-wider">${MONTH_NAMES[parseInt(k.split('-')[1], 10) - 1].slice(0, 3).toUpperCase()}</span>
+          <span class="text-[10px] opacity-80">${k.split('-')[0]}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-strong">${mesLabel(k)}${k === atual ? ' <span class="pill pill-gold ml-1" style="padding:.1rem .5rem;font-size:10px">atual</span>' : ''}</div>
+          <div class="text-xs muted">${Object.keys(s.data).length} colaboradores • ${totalF} folgas</div>
+        </div>
+        <button onclick="deleteMes('${k}')" class="icon-btn" style="color:var(--danger)" title="Excluir mês"><i class="fas fa-trash-can text-sm"></i></button>
+      </div>`;
+  }).join('') || '<p class="text-sm muted">Nenhum mês cadastrado</p>';
 }
 
 function openMesModal() {
@@ -202,7 +224,7 @@ async function changeAdminPassword() {
 function saveConfig() {
   DB.config.titulo = document.getElementById('config-titulo').value.trim() || 'Elétrica & Cogeração';
   saveDB();
-  document.getElementById('header-subtitle').innerHTML = DB.config.titulo + ' <span class="text-slate-400">' + APP_VERSION + '</span>';
+  renderTitulo();
   toast('Configurações salvas!');
 }
 
@@ -244,15 +266,19 @@ function importData(e) {
   e.target.value = '';
 }
 
+let toastTimer = null;
 function toast(msg, isError = false) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm fade-in ${isError ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`;
+  t.innerHTML = `<div class="toast-inner fade-in ${isError ? 'err' : ''}"><span class="ic">${isError ? '!' : '✓'}</span><span>${esc(msg)}</span></div>`;
   t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), 3000);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), 3200);
 }
 
+syncThemeIcons();
+document.querySelectorAll('.app-version').forEach(el => { el.textContent = APP_VERSION; });
 loadDB().then(() => {
+  renderTitulo();
   if (dbOffline) toast('Sem conexão com o servidor — exibindo a última cópia salva neste aparelho', true);
 });
 document.getElementById('input-matricula').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
