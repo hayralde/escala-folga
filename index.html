@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portal de Escala de Folga | Elétrica & Cogeração</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Escala de Folga | RRP Bioenergia · Elétrica & Cogeração</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#1e3a8a" />
+  <meta name="theme-color" content="#174A2B" />
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
@@ -14,292 +14,496 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Escala Folga" />
+  <script>
+    // Tema aplicado antes da pintura para não piscar: preferência salva no aparelho ou a do sistema
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('ef_theme'); } catch (e) {}
+      if (t !== 'dark' && t !== 'light') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    .folga-cell { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 700; }
-    .trabalho-cell { background: #f8fafc; }
-    .calendar-day { transition: all 0.15s ease; }
-    .calendar-day:hover { transform: scale(1.05); }
-    .fade-in { animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .table-scroll { max-height: 70vh; overflow: auto; }
-    .sticky-col { position: sticky; left: 0; z-index: 10; background: white; }
+    /* ============ Identidade RRP Bioenergia: verde agro + dourado milho ============ */
+    :root, :root[data-theme="light"] {
+      --bg: #F5F1E8;
+      --surface: #FFFFFF;
+      --surface-2: #F8F6F0;
+      --border: #E8E0C8;
+      --text: #1A2E1A;
+      --text-strong: #0F3D2E;
+      --muted: #7A8A6A;
+      --muted-2: #9AA88E;
+      --green: #174A2B;
+      --green-2: #2E7D32;
+      --gold: #D4A017;
+      --gold-soft: #FFF6DC;
+      --danger: #B3261E;
+      --danger-soft: #FCE8E6;
+      --shadow: 0 1px 2px rgba(23, 74, 43, .05), 0 8px 24px rgba(23, 74, 43, .06);
+      --nav-bg: rgba(248, 246, 240, .92);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0F2015;
+      --surface: #172A1E;
+      --surface-2: #1C3A25;
+      --border: #25432F;
+      --text: #F5F1E8;
+      --text-strong: #F5F1E8;
+      --muted: #A8C4A0;
+      --muted-2: #6B8A64;
+      --green: #2E7D32;
+      --green-2: #3F9A44;
+      --gold: #E0B02A;
+      --gold-soft: #2A2A12;
+      --danger: #F2B8B5;
+      --danger-soft: #3B1C1A;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+      --nav-bg: rgba(23, 42, 30, .92);
+    }
+    .hidden { display: none !important; }
+    .only-desktop { display: none; }
+    @media (min-width: 640px) { .only-desktop { display: inline-flex; } }
+    html { background: var(--bg); }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; }
+    .font-display { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; letter-spacing: -0.01em; }
+    .bg-deco {
+      background:
+        radial-gradient(900px 420px at 110% -10%, rgba(212, 160, 23, .14), transparent 60%),
+        radial-gradient(700px 380px at -10% 110%, rgba(46, 125, 50, .12), transparent 60%),
+        var(--bg);
+    }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); }
+    .card-green { background: linear-gradient(135deg, #174A2B 0%, #2E7D32 100%); color: #fff; border-radius: 22px; position: relative; overflow: hidden; box-shadow: 0 10px 28px rgba(23, 74, 43, .28); }
+    .card-green::after { content: ''; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(212, 160, 23, .45), transparent 70%); }
+    .muted { color: var(--muted); }
+    .text-strong { color: var(--text-strong); }
+    .pill { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font-size: 12px; padding: .3rem .75rem; }
+    .pill-gold { background: var(--gold-soft); border-color: rgba(212, 160, 23, .45); color: #8D6E2F; }
+    :root[data-theme="dark"] .pill-gold { color: var(--gold); }
+    .chip-mat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; padding: .1rem .45rem; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+    .status { display: inline-flex; align-items: center; gap: .35rem; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: .3rem .7rem; white-space: nowrap; }
+    .status-folga { background: var(--green); color: #fff; }
+    .status-folga::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+    .status-trab { border: 1px solid var(--border); color: var(--muted); background: var(--surface); }
+    .field { width: 100%; height: 48px; border-radius: 14px; padding: 0 1rem; font-size: 14px; outline: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); transition: border-color .15s, box-shadow .15s; }
+    .field:focus { border-color: var(--green-2); box-shadow: 0 0 0 3px rgba(46, 125, 50, .18); }
+    .label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: .45rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; height: 44px; padding: 0 1.1rem; border-radius: 999px; font-weight: 600; font-size: 14px; transition: transform .1s, filter .15s, background .15s; border: 1px solid transparent; }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: linear-gradient(135deg, #174A2B, #2E7D32); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.08); }
+    .btn-gold { background: var(--gold); color: #1A2E1A; }
+    .btn-ghost { background: var(--surface-2); border-color: var(--border); color: var(--text-strong); }
+    .btn-danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+    .icon-btn { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border); color: var(--text-strong); transition: transform .1s; }
+    .icon-btn:active { transform: scale(.95); }
+    .avatar { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; flex-shrink: 0; position: relative; }
+    .avatar .dot { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--surface); }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px; }
+    .seg button { height: 40px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted); transition: background .15s, color .15s; }
+    .seg button.active { background: var(--green); color: #fff; box-shadow: 0 4px 12px rgba(23, 74, 43, .25); }
+    .fade-in { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* ============ Calendário do colaborador (semana começa na segunda) ============ */
+    #user-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .wd { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted-2); padding: 4px 0 6px; }
+    .day { aspect-ratio: 1 / 1.08; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--surface); color: var(--text-strong); position: relative; }
+    .day .n { font-weight: 700; font-size: 15px; line-height: 1; }
+    .day .t { font-size: 8px; letter-spacing: .08em; margin-top: 3px; color: var(--muted-2); font-weight: 600; }
+    .day.folga { background: linear-gradient(145deg, #174A2B, #2E7D32); border-color: transparent; color: #fff; box-shadow: 0 6px 14px rgba(23, 74, 43, .28); }
+    .day.folga .t { color: #FFD35C; }
+    .day.folga::after { content: ''; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+    .day.hoje { outline: 2px solid var(--gold); outline-offset: 1px; }
+    @media (max-width: 380px) { #user-calendar { gap: 4px; } .day { border-radius: 11px; } .day .n { font-size: 13px; } .day .t { font-size: 7px; } }
+
+    /* ============ Tabela da escala completa (admin) ============ */
+    .table-scroll { max-height: 68vh; overflow: auto; border-radius: 22px; }
+    #admin-table { border-collapse: separate; border-spacing: 0; }
+    #admin-table th { background: var(--surface-2); color: var(--muted); font-weight: 600; }
+    #admin-table td { border-top: 1px solid var(--border); }
+    .sticky-col { position: sticky; left: 0; z-index: 10; background: var(--surface); }
     /* Larguras fixas: a coluna do nome fica exatamente após a matrícula, sem sobrepor o dia 01 */
     .col-mat { left: 0; width: 56px; min-width: 56px; max-width: 56px; }
-    .col-nome { left: 56px; width: 200px; min-width: 200px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; box-shadow: inset -1px 0 #e2e8f0; }
-    thead .sticky-col { background: #f1f5f9; z-index: 30; }
-    .sticky-header { position: sticky; top: 0; z-index: 20; }
+    .col-nome { left: 56px; width: 200px; min-width: 200px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; box-shadow: inset -1px 0 var(--border); }
+    thead .sticky-col { background: var(--surface-2) !important; z-index: 30; }
+    .sticky-header th { position: sticky; top: 0; z-index: 20; }
+    .cell { width: 24px; height: 24px; margin: 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .cell.folga { background: linear-gradient(145deg, #174A2B, #2E7D32); color: #FFD35C; }
+    .cell.trab { background: var(--surface-2); }
+    .cell.hoje { outline: 2px solid var(--gold); outline-offset: 1px; }
+    .editing .cell:hover { outline: 2px solid var(--green-2); cursor: pointer; }
+
+    /* ============ Barras, navegação inferior, modais, toast ============ */
+    .bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+    .bar > span { display: block; height: 100%; border-radius: 999px; }
+    #admin-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--nav-bg); backdrop-filter: blur(12px); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0 8px; font-size: 11px; font-weight: 500; color: var(--muted-2); position: relative; }
+    .nav-btn i { font-size: 17px; }
+    .nav-btn.active { color: var(--green); font-weight: 700; }
+    :root[data-theme="dark"] .nav-btn.active { color: var(--text); }
+    .nav-btn.active::after { content: ''; position: absolute; bottom: 2px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+    .fab { position: fixed; right: 20px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 41; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(145deg, #E0B02A, #D4A017); color: #1A2E1A; font-size: 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 24px rgba(212, 160, 23, .45); }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(10, 25, 15, .55); backdrop-filter: blur(4px); }
+    .sheet { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 480px; border-radius: 28px 28px 0 0; padding: 1.5rem; animation: slideUp .3s cubic-bezier(.16, 1, .3, 1); max-height: 92vh; overflow-y: auto; }
+    @media (min-width: 640px) { .sheet { border-radius: 28px; } }
+    .sheet-handle { width: 42px; height: 5px; border-radius: 999px; background: var(--border); margin: -0.5rem auto 1rem; }
+    #toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 80; max-width: calc(100% - 32px); }
+    .toast-inner { display: flex; align-items: center; gap: .6rem; padding: .75rem 1.1rem; border-radius: 999px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); background: #F5F1E8; color: #0F3D2E; border: 1px solid #E8E0C8; }
+    .toast-inner .ic { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; background: #2E7D32; flex-shrink: 0; }
+    .toast-inner.err .ic { background: #B3261E; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-    .modal-backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
-    #user-calendar { max-width: 320px; margin: 0 auto; gap: 5px; }
-    #user-calendar .calendar-day { width: 100%; max-width: 40px; height: 40px; aspect-ratio: 1; font-size: 0.75rem; margin: 0 auto; border-radius: 6px; }
-    #user-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-    #admin-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-    @media (min-width: 1024px) {
-      #admin-stats { grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (max-width: 480px) {
-      #user-calendar { max-width: 100%; gap: 4px; }
-      #user-calendar .calendar-day { max-width: none; height: auto; min-height: 38px; font-size: 0.8rem; }
-      #user-stats, #admin-stats { gap: 0.5rem; }
-      #user-stats .stat-card, #admin-stats .stat-card { padding: 0.75rem 0.5rem; }
-      #user-stats .stat-label, #admin-stats .stat-label { font-size: 0.65rem; line-height: 1.2; }
-      #user-stats .stat-value, #admin-stats .stat-value { font-size: 1.25rem; }
-    }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    select.field { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 2.2rem; }
+    .select-pill { width: auto; height: 38px; font-size: 13px; font-weight: 600; border-radius: 999px; color: #8D6E2F; background-color: var(--gold-soft); border-color: rgba(212, 160, 23, .45); }
+    :root[data-theme="dark"] .select-pill { color: var(--gold); }
+    a.rrp-link { text-decoration: none; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body class="min-h-screen">
 
-  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
-      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
-        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-          <i class="fas fa-calendar-check text-3xl"></i>
-        </div>
-        <h1 class="text-2xl font-bold">Portal de Escala de Folga</h1>
-        <p class="text-blue-100 text-sm mt-1">Elétrica & Cogeração · v1.5.0</p>
+  <!-- ================= LOGIN ================= -->
+  <div id="login-screen" class="min-h-screen bg-deco flex flex-col items-center justify-center px-4 py-8">
+    <div class="w-full max-w-md">
+      <div class="flex justify-end mb-3">
+        <button onclick="toggleTheme()" class="icon-btn theme-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
       </div>
-      <div class="p-6 space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-slate-600 mb-1">Tipo de acesso</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="btn-tipo-user" onclick="setLoginType('user')" class="py-2.5 rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 font-medium text-sm">
-              <i class="fas fa-user mr-1"></i> Colaborador
-            </button>
-            <button id="btn-tipo-admin" onclick="setLoginType('admin')" class="py-2.5 rounded-lg border-2 border-slate-200 text-slate-600 font-medium text-sm hover:border-slate-300">
-              <i class="fas fa-shield-alt mr-1"></i> Administrador
-            </button>
+      <div class="card p-6 sm:p-8 fade-in">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background: var(--surface-2); border: 1px solid var(--border)">
+            <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3c6 4 9 9 9 14a9 9 0 0 1-18 0C7 12 10 7 16 3z" fill="#174A2B"/><path d="M16 8v20" stroke="#D4A017" stroke-width="2.2" stroke-linecap="round"/><path d="M16 15l-4-3M16 20l4-3" stroke="#D4A017" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="font-display text-2xl font-bold leading-none text-strong">RRP <span class="text-sm tracking-[0.25em] font-semibold muted">BIOENERGIA</span></div>
+            <div class="pill mt-2"><span class="w-1.5 h-1.5 rounded-full" style="background: var(--green-2)"></span> <span id="login-titulo">Elétrica & Cogeração</span></div>
           </div>
         </div>
+        <h1 class="font-display text-xl font-bold text-strong">Escala de Folga</h1>
+        <p class="text-sm muted mb-6">Consulte sua escala ou acesse a administração.</p>
+
+        <div class="seg mb-5">
+          <button id="btn-tipo-user" onclick="setLoginType('user')" class="active"><i class="fas fa-user mr-1.5"></i>Colaborador</button>
+          <button id="btn-tipo-admin" onclick="setLoginType('admin')"><i class="fas fa-shield-halved mr-1.5"></i>Administrador</button>
+        </div>
         <div id="login-user-fields">
-          <label class="block text-sm font-medium text-slate-600 mb-1">Matrícula</label>
-          <input id="input-matricula" type="text" placeholder="Ex: 779" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
-          <p class="text-xs text-slate-400 mt-1">Digite sua matrícula para consultar sua escala</p>
+          <label class="label" for="input-matricula">Matrícula</label>
+          <input id="input-matricula" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex: 779" class="field" />
         </div>
         <div id="login-admin-fields" class="hidden">
-          <label class="block text-sm font-medium text-slate-600 mb-1">Senha do Administrador</label>
-          <input id="input-senha" type="password" placeholder="Senha" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+          <label class="label" for="input-senha">Senha do administrador</label>
+          <input id="input-senha" type="password" placeholder="Senha" class="field" />
         </div>
-        <button onclick="doLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
-          <i class="fas fa-sign-in-alt"></i> Entrar
-        </button>
-        <div id="login-error" class="hidden text-red-600 text-sm text-center bg-red-50 py-2 rounded-lg"></div>
-        <button onclick="installApp()" class="install-btn hidden w-full border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2">
-          <i class="fas fa-mobile-alt"></i> Instalar app
-        </button>
-        <p id="ios-install-hint" class="hidden text-xs text-slate-500 text-center">
-          <i class="fas fa-mobile-alt mr-1"></i> Para instalar: toque em <strong>Compartilhar</strong> <i class="fas fa-arrow-up-from-bracket"></i> e depois em <strong>Adicionar à Tela de Início</strong>.
-        </p>
+        <button onclick="doLogin()" class="btn btn-primary w-full mt-5" style="height: 50px">Entrar <i class="fas fa-arrow-right"></i></button>
+        <div id="login-error" class="hidden mt-4 text-sm text-center py-2.5 rounded-2xl" style="background: var(--danger-soft); color: var(--danger)"></div>
+        <button onclick="installApp()" class="install-btn hidden btn btn-ghost w-full mt-3"><i class="fas fa-mobile-screen-button"></i> Instalar app</button>
       </div>
+      <a href="https://rrpbioenergia.com.br/" target="_blank" rel="noopener" class="rrp-link card mt-4 px-5 py-4 flex items-center gap-3" style="background: var(--gold-soft); border-color: rgba(212,160,23,.4)">
+        <span class="text-lg">🌽</span>
+        <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
+        <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
+      </a>
+      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.0.0</span></p>
     </div>
   </div>
 
-  <div id="app" class="hidden min-h-screen flex flex-col">
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white">
-            <i class="fas fa-calendar-alt"></i>
+  <!-- ================= APP ================= -->
+  <div id="app" class="hidden min-h-screen bg-deco flex flex-col">
+    <header class="sticky top-0 z-30" style="background: var(--nav-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border)">
+      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style="background: var(--surface); border: 1px solid var(--border)">
+            <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3c6 4 9 9 9 14a9 9 0 0 1-18 0C7 12 10 7 16 3z" fill="#2E7D32"/><path d="M16 8v20" stroke="#D4A017" stroke-width="2.2" stroke-linecap="round"/><path d="M16 15l-4-3M16 20l4-3" stroke="#D4A017" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
-          <div>
-            <h1 class="font-bold text-slate-800 leading-tight">Escala de Folga</h1>
-            <p class="text-xs text-slate-500" id="header-subtitle">Elétrica & Cogeração <span class="text-slate-400">v1.5.0</span></p>
+          <div class="min-w-0">
+            <div class="font-display font-bold leading-none text-strong whitespace-nowrap">RRP <span class="text-[10px] tracking-[0.2em] font-semibold muted">BIOENERGIA</span></div>
+            <div class="text-[11px] muted mt-1 truncate" id="header-subtitle">Elétrica & Cogeração</div>
           </div>
         </div>
-        <div class="flex items-center gap-3">
-          <button onclick="installApp()" class="install-btn hidden text-sm text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full font-medium" title="Instalar app"><i class="fas fa-download mr-1"></i><span class="hidden sm:inline">Instalar app</span></button>
-          <span id="user-badge" class="text-sm bg-slate-100 px-3 py-1.5 rounded-full font-medium"></span>
-          <button onclick="doLogout()" class="text-slate-500 hover:text-red-600 transition" title="Sair">
-            <i class="fas fa-sign-out-alt text-lg"></i>
-          </button>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="only-desktop"><button onclick="installApp()" class="install-btn hidden icon-btn" title="Instalar app"><i class="fas fa-download"></i></button></span>
+          <button onclick="toggleTheme()" class="icon-btn theme-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
+          <span id="user-badge"></span>
+          <button onclick="doLogout()" class="icon-btn" title="Sair"><i class="fas fa-arrow-right-from-bracket"></i></button>
         </div>
       </div>
     </header>
 
-    <nav id="admin-nav" class="hidden bg-slate-800 text-white">
-      <div class="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto">
-        <button onclick="showSection('admin-dashboard')" data-section="admin-dashboard" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-tachometer-alt mr-1"></i> Dashboard</button>
-        <button onclick="showSection('admin-escala')" data-section="admin-escala" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-table mr-1"></i> Escala Completa</button>
-        <button onclick="showSection('admin-usuarios')" data-section="admin-usuarios" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-users mr-1"></i> Colaboradores</button>
-        <button onclick="showSection('admin-meses')" data-section="admin-meses" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-calendar-plus mr-1"></i> Meses</button>
-        <button onclick="showSection('admin-config')" data-section="admin-config" class="nav-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-slate-700 transition"><i class="fas fa-cog mr-1"></i> Configurações</button>
-      </div>
-    </nav>
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 pt-5 pb-8" id="main">
 
-    <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+      <!-- ===== Colaborador ===== -->
       <section id="section-user-escala" class="hidden fade-in">
-        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
-            <h2 class="text-2xl font-bold text-slate-800" id="user-welcome">Olá!</h2>
-            <p class="text-slate-500" id="user-mes-info">Sua escala de folga</p>
+            <h2 class="font-display text-2xl font-bold text-strong" id="user-welcome">Olá!</h2>
+            <p class="text-sm muted" id="user-mes-info">Sua escala de folga</p>
           </div>
           <div class="flex items-center gap-2">
-            <label class="text-sm text-slate-600">Mês:</label>
-            <select id="user-mes-select" onchange="renderUserEscala()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></select>
+            <span id="user-status"></span>
+            <select id="user-mes-select" onchange="renderUserEscala()" class="field select-pill w-auto"></select>
           </div>
         </div>
-        <div id="user-stats" class="mb-6">
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500 mb-1">Total de Folgas</div><div class="stat-value text-3xl font-bold text-emerald-600" id="stat-folgas">0</div></div>
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500 mb-1">Dias de Trabalho</div><div class="stat-value text-3xl font-bold text-blue-600" id="stat-trabalho">0</div></div>
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500 mb-1">Próxima Folga</div><div class="stat-value text-xl font-bold text-slate-700" id="stat-proxima">—</div></div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-          <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><i class="fas fa-calendar text-blue-500"></i> Calendário do Mês</h3>
-          <div id="user-calendar" class="grid grid-cols-7"></div>
-          <div class="mt-4 flex gap-4 text-sm justify-center">
-            <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded folga-cell"></span> Folga</span>
-            <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded bg-slate-100 border"></span> Trabalho</span>
+
+        <div id="user-stats" class="grid grid-cols-3 gap-3 mb-5">
+          <div class="card p-4">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center mb-3" style="background: var(--surface-2)"><i class="fas fa-leaf" style="color: var(--green-2)"></i></div>
+            <div class="font-display text-3xl font-bold text-strong" id="stat-folgas">0</div>
+            <div class="text-xs muted leading-tight mt-1">Folgas<br>no mês</div>
+          </div>
+          <div class="card p-4">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center mb-3" style="background: var(--gold-soft)">🌽</div>
+            <div class="font-display text-3xl font-bold text-strong" id="stat-trabalho">0</div>
+            <div class="text-xs muted leading-tight mt-1">Dias de<br>trabalho</div>
+          </div>
+          <div class="card-green p-4">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center mb-3" style="background: #D4A017; color: #1A2E1A"><i class="fas fa-arrow-trend-up"></i></div>
+            <div class="font-display text-2xl sm:text-3xl font-bold relative z-10" id="stat-proxima">—</div>
+            <div class="text-xs leading-tight mt-1 relative z-10" style="color: #CFE3C9">Próxima<br>folga</div>
           </div>
         </div>
-        <div class="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-          <h3 class="font-semibold text-slate-700 mb-3">Lista de Folgas</h3>
+
+        <div class="card p-4 sm:p-6">
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background: var(--surface-2)"><i class="fas fa-calendar-days" style="color: var(--green-2)"></i></div>
+              <h3 class="font-display font-bold text-strong" id="user-cal-title">Calendário</h3>
+            </div>
+            <span class="pill" id="user-ciclo">Ciclo</span>
+          </div>
+          <div id="user-calendar"></div>
+          <div class="mt-5 pt-4 flex items-center gap-5 text-xs muted" style="border-top: 1px solid var(--border)">
+            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full" style="background: linear-gradient(145deg,#174A2B,#2E7D32); box-shadow: inset 0 0 0 2px #D4A017"></span> Folga</span>
+            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full" style="border: 1px solid var(--border)"></span> Trabalho</span>
+            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full" style="outline: 2px solid var(--gold); outline-offset: -2px"></span> Hoje</span>
+          </div>
+        </div>
+
+        <div class="card p-4 sm:p-6 mt-4">
+          <h3 class="font-display font-bold text-strong mb-3">Minhas folgas</h3>
           <div id="user-lista-folgas" class="flex flex-wrap gap-2"></div>
         </div>
+
+        <button onclick="installApp()" class="install-btn hidden card w-full px-5 py-4 flex items-center gap-3 text-left mt-4">
+          <span class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style="background:linear-gradient(145deg,#174A2B,#2E7D32)"><i class="fas fa-mobile-screen-button" style="color:#FFD35C"></i></span>
+          <span class="flex-1"><span class="block font-semibold text-strong">Instalar o app</span><span class="block text-xs muted">Acesse a escala direto da tela inicial, como um aplicativo</span></span>
+          <i class="fas fa-download muted"></i>
+        </button>
       </section>
 
+      <!-- ===== Admin: Dashboard ===== -->
       <section id="section-admin-dashboard" class="hidden fade-in">
-        <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-        <div id="admin-stats" class="mb-8">
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Colaboradores</div><div class="stat-value text-3xl font-bold text-blue-600" id="dash-users">0</div></div>
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Meses Cadastrados</div><div class="stat-value text-3xl font-bold text-indigo-600" id="dash-meses">0</div></div>
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Mês Atual</div><div class="stat-value text-xl font-bold text-slate-700 mt-1" id="dash-mes-ativo">—</div></div>
-          <div class="stat-card bg-white rounded-xl p-5 shadow-sm border border-slate-200 text-center"><div class="stat-label text-sm text-slate-500">Total Folgas (mês)</div><div class="stat-value text-3xl font-bold text-emerald-600" id="dash-folgas">0</div></div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-          <h3 class="font-semibold mb-3">Ações Rápidas</h3>
-          <div class="flex flex-wrap gap-3">
-            <button onclick="showSection('admin-escala')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-edit mr-1"></i> Editar Escala</button>
-            <button onclick="showSection('admin-usuarios')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"><i class="fas fa-user-plus mr-1"></i> Gerenciar Colaboradores</button>
-            <button onclick="exportData()" class="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700"><i class="fas fa-download mr-1"></i> Exportar Dados</button>
-            <button onclick="document.getElementById('import-file').click()" class="px-4 py-2 bg-slate-500 text-white rounded-lg text-sm hover:bg-slate-600"><i class="fas fa-upload mr-1"></i> Importar Dados</button>
-            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)" />
+        <h2 class="font-display text-2xl font-bold text-strong mb-1">Painel</h2>
+        <p class="text-sm muted mb-5" id="dash-mes-ativo">—</p>
+        <div class="card-green p-5 mb-4">
+          <div class="relative z-10 flex items-end justify-between gap-3">
+            <div>
+              <div class="text-[11px] uppercase tracking-widest" style="color: #CFE3C9">Colaboradores</div>
+              <div class="font-display text-4xl font-bold mt-1" id="dash-users">0</div>
+            </div>
+            <div class="flex -space-x-2" id="dash-avatars"></div>
           </div>
+        </div>
+        <div id="admin-stats" class="grid grid-cols-2 gap-3 mb-4">
+          <div class="card p-4"><div class="text-xs muted">Meses cadastrados</div><div class="font-display text-3xl font-bold text-strong mt-1" id="dash-meses">0</div></div>
+          <div class="card p-4"><div class="text-xs muted">Folgas no mês</div><div class="font-display text-3xl font-bold text-strong mt-1" id="dash-folgas">0</div></div>
+        </div>
+        <div class="card p-5 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-display font-bold text-strong flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--gold)"></span> Folga hoje</h3>
+            <span class="pill" id="dash-hoje-data">—</span>
+          </div>
+          <div id="dash-hoje" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div class="card p-5 mb-4">
+          <h3 class="font-display font-bold text-strong flex items-center gap-2 mb-4"><span class="w-2 h-2 rounded-full" style="background: var(--gold)"></span> Folgas por colaborador</h3>
+          <div id="dash-barras" class="space-y-3"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="showSection('admin-escala')" class="card-green p-4 text-left">
+            <div class="relative z-10"><i class="fas fa-table-cells text-lg" style="color:#FFD35C"></i><div class="font-semibold mt-3">Editar escala</div><div class="text-xs" style="color:#CFE3C9">Tabela completa</div></div>
+          </button>
+          <button onclick="exportData()" class="card p-4 text-left">
+            <i class="fas fa-file-arrow-down text-lg" style="color: var(--gold)"></i><div class="font-semibold mt-3 text-strong">Exportar</div><div class="text-xs muted">Backup JSON</div>
+          </button>
         </div>
       </section>
 
+      <!-- ===== Admin: Escala completa ===== -->
       <section id="section-admin-escala" class="hidden fade-in">
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 class="text-2xl font-bold">Escala Completa</h2>
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 class="font-display text-2xl font-bold text-strong">Escala completa</h2>
           <div class="flex items-center gap-2 flex-wrap">
-            <select id="admin-mes-select" onchange="renderAdminEscala()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm"></select>
-            <button onclick="toggleEditMode()" id="btn-edit-mode" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600"><i class="fas fa-pen mr-1"></i> Modo Edição</button>
-            <button onclick="saveEscala()" id="btn-save-escala" class="hidden px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"><i class="fas fa-save mr-1"></i> Salvar</button>
+            <select id="admin-mes-select" onchange="renderAdminEscala()" class="field select-pill w-auto"></select>
+            <button onclick="toggleEditMode()" id="btn-edit-mode" class="btn btn-gold" style="height: 38px"><i class="fas fa-pen"></i> Editar</button>
+            <button onclick="saveEscala()" id="btn-save-escala" class="hidden btn btn-primary" style="height: 38px"><i class="fas fa-check"></i> Salvar</button>
           </div>
         </div>
-        <div class="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg p-3 mb-4 hidden" id="edit-hint">
-          <i class="fas fa-info-circle mr-1"></i>
-          <strong>Clique</strong> em qualquer dia → a folga daquele colaborador é reprogramada automaticamente seguindo o ciclo dele (padrão 6 dias).
-          <br><strong>Shift + clique</strong> → limpa todas as folgas. Depois clique em <strong>Salvar</strong>.
+        <div class="hidden card p-4 mb-4 text-sm" id="edit-hint" style="background: var(--gold-soft); border-color: rgba(212,160,23,.45)">
+          <i class="fas fa-circle-info mr-1" style="color: var(--gold)"></i>
+          <strong>Toque</strong> em um dia → as folgas do colaborador são reprogramadas seguindo o ciclo dele.
+          <strong>Shift + clique</strong> (computador) → limpa as folgas do mês. Depois toque em <strong>Salvar</strong>.
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="card overflow-hidden">
           <div class="table-scroll">
             <table class="w-full text-sm" id="admin-table">
-              <thead class="sticky-header bg-slate-100"><tr id="admin-table-header"></tr></thead>
+              <thead class="sticky-header"><tr id="admin-table-header"></tr></thead>
               <tbody id="admin-table-body"></tbody>
             </table>
           </div>
         </div>
-        <p class="text-xs text-slate-400 mt-2">Células verdes = Folga (F).</p>
+        <p class="text-xs muted mt-2">F = folga • contorno dourado = hoje.</p>
       </section>
 
+      <!-- ===== Admin: Equipe ===== -->
       <section id="section-admin-usuarios" class="hidden fade-in">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-2xl font-bold">Colaboradores</h2>
-          <button onclick="openUserModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-user-plus mr-1"></i> Novo Colaborador</button>
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="font-display text-2xl font-bold text-strong">Equipe</h2>
+          <span class="pill" id="equipe-count">0</span>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-100"><tr><th class="text-left px-4 py-3 font-semibold">Matrícula</th><th class="text-left px-4 py-3 font-semibold">Nome</th><th class="text-left px-4 py-3 font-semibold">Ações</th></tr></thead>
-            <tbody id="users-table-body"></tbody>
-          </table>
-        </div>
+        <p class="text-sm muted mb-4">Toque em um colaborador para editar.</p>
+        <div id="users-list" class="space-y-3"></div>
       </section>
 
-      <section id="section-admin-meses" class="hidden fade-in">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-2xl font-bold">Gerenciar Meses</h2>
-          <button onclick="openMesModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-calendar-plus mr-1"></i> Novo Mês</button>
-        </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="meses-grid"></div>
-      </section>
-
+      <!-- ===== Admin: Ajustes (meses + configurações) ===== -->
       <section id="section-admin-config" class="hidden fade-in">
-        <h2 class="text-2xl font-bold mb-6">Configurações</h2>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 max-w-lg space-y-4">
+        <h2 class="font-display text-2xl font-bold text-strong mb-4">Ajustes</h2>
+
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-display font-bold text-strong">Meses cadastrados</h3>
+          <button onclick="openMesModal()" class="btn btn-ghost" style="height: 36px; font-size: 13px"><i class="fas fa-plus"></i> Novo mês</button>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3 mb-6" id="meses-grid"></div>
+
+        <div class="card p-5 space-y-4 mb-4">
+          <h3 class="font-display font-bold text-strong">Configurações</h3>
           <div>
-            <label class="block text-sm font-medium mb-1">Senha do Administrador</label>
+            <label class="label" for="config-titulo">Nome do setor / título</label>
             <div class="flex gap-2">
-              <input id="config-senha" type="password" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-              <button onclick="changeAdminPassword()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Alterar</button>
+              <input id="config-titulo" type="text" class="field" />
+              <button onclick="saveConfig()" class="btn btn-primary shrink-0">Salvar</button>
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Nome do Setor / Título</label>
-            <input id="config-titulo" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            <label class="label" for="config-senha">Nova senha do administrador</label>
+            <div class="flex gap-2">
+              <input id="config-senha" type="password" class="field" />
+              <button onclick="changeAdminPassword()" class="btn btn-primary shrink-0">Alterar</button>
+            </div>
           </div>
-          <button onclick="saveConfig()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm"><i class="fas fa-save mr-1"></i> Salvar Configurações</button>
-          <hr class="my-4" />
-          <button onclick="resetAllData()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"><i class="fas fa-trash-alt mr-1"></i> Resetar Todos os Dados</button>
         </div>
+
+        <div class="card p-5 mb-4">
+          <h3 class="font-display font-bold text-strong mb-3">Backup</h3>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportData()" class="btn btn-ghost"><i class="fas fa-file-arrow-down"></i> Exportar</button>
+            <button onclick="document.getElementById('import-file').click()" class="btn btn-ghost"><i class="fas fa-file-arrow-up"></i> Importar</button>
+            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)" />
+            <button onclick="resetAllData()" class="btn btn-danger"><i class="fas fa-trash-can"></i> Resetar dados</button>
+          </div>
+        </div>
+
+        <button onclick="installApp()" class="install-btn hidden card w-full px-5 py-4 flex items-center gap-3 text-left mb-4">
+          <span class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style="background:linear-gradient(145deg,#174A2B,#2E7D32)"><i class="fas fa-mobile-screen-button" style="color:#FFD35C"></i></span>
+          <span class="flex-1"><span class="block font-semibold text-strong">Instalar o app</span><span class="block text-xs muted">Acesse a escala direto da tela inicial, como um aplicativo</span></span>
+          <i class="fas fa-download muted"></i>
+        </button>
+
+        <a href="https://rrpbioenergia.com.br/" target="_blank" rel="noopener" class="rrp-link card px-5 py-4 flex items-center gap-3" style="background: var(--gold-soft); border-color: rgba(212,160,23,.4)">
+          <span class="text-lg">🌽</span>
+          <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
+          <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
+        </a>
       </section>
     </main>
 
-    <footer class="text-center text-xs text-slate-400 py-4 border-t border-slate-200">
-      Portal de Escala de Folga • v1.5.0 • Dados sincronizados na nuvem
+    <footer class="text-center text-[11px] muted pb-6 tracking-widest uppercase" id="app-footer">
+      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.0.0</span>
     </footer>
+
+    <button id="fab-add" onclick="openUserModal()" class="fab hidden" title="Adicionar colaborador"><i class="fas fa-plus"></i></button>
+
+    <nav id="admin-nav" class="hidden">
+      <div class="max-w-md mx-auto flex">
+        <button onclick="showSection('admin-dashboard')" data-section="admin-dashboard" class="nav-btn"><i class="fas fa-chart-simple"></i>Painel</button>
+        <button onclick="showSection('admin-escala')" data-section="admin-escala" class="nav-btn"><i class="fas fa-table-cells"></i>Escala</button>
+        <button onclick="showSection('admin-usuarios')" data-section="admin-usuarios" class="nav-btn"><i class="fas fa-users"></i>Equipe</button>
+        <button onclick="showSection('admin-config')" data-section="admin-config" class="nav-btn"><i class="fas fa-gear"></i>Ajustes</button>
+      </div>
+    </nav>
   </div>
 
-  <div id="modal-user" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in">
-      <h3 class="text-xl font-bold mb-4" id="modal-user-title">Novo Colaborador</h3>
+  <!-- ================= Modais ================= -->
+  <div id="modal-user" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center modal-backdrop sm:p-4">
+    <div class="sheet">
+      <div class="sheet-handle sm:hidden"></div>
+      <h3 class="font-display text-xl font-bold text-strong mb-5" id="modal-user-title">Novo colaborador</h3>
       <input type="hidden" id="edit-user-id" />
-      <div class="space-y-3">
-        <div><label class="block text-sm font-medium mb-1">Matrícula *</label><input id="form-matricula" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
-        <div><label class="block text-sm font-medium mb-1">Nome Completo *</label><input id="form-nome" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Dia da folga (âncora)</label>
-          <input id="form-dia-folga" type="number" min="1" max="31" placeholder="Ex: 4" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-          <p class="text-xs text-slate-400 mt-1">Informe um dia (1–31) do mês atual. Deixe em branco para não gerar escala ainda.</p>
+      <div class="space-y-4">
+        <div><label class="label" for="form-nome">Nome completo *</label><input id="form-nome" type="text" class="field" /></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label" for="form-matricula">Matrícula *</label><input id="form-matricula" type="text" inputmode="numeric" class="field" /></div>
+          <div><label class="label" for="form-setor">Setor</label>
+            <select id="form-setor" class="field"><option value="">—</option><option>Elétrica</option><option>Cogeração</option></select>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Ciclo de folga (dias)</label>
-          <input id="form-ciclo" type="number" min="2" max="31" value="6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-          <p class="text-xs text-slate-400 mt-1">Uma folga a cada N dias (padrão 6).</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label" for="form-dia-folga">Dia da folga</label><input id="form-dia-folga" type="number" min="1" max="31" placeholder="Ex: 4" class="field" /></div>
+          <div><label class="label" for="form-ciclo">Ciclo (dias)</label><input id="form-ciclo" type="number" min="2" max="31" value="6" class="field" /></div>
         </div>
+        <p class="text-xs muted -mt-1">Dia da folga: um dia (1–31) do mês atual, usado como âncora. Ciclo: uma folga a cada N dias (padrão 6). Deixe o dia em branco para não gerar escala.</p>
       </div>
-      <div class="flex gap-2 mt-6">
-        <button onclick="closeUserModal()" class="flex-1 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancelar</button>
-        <button onclick="saveUser()" class="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Salvar</button>
+      <div class="grid grid-cols-2 gap-3 mt-6">
+        <button onclick="closeUserModal()" class="btn btn-ghost">Cancelar</button>
+        <button onclick="saveUser()" class="btn btn-primary">Salvar</button>
+      </div>
+      <button id="btn-delete-user" onclick="deleteUser(document.getElementById('edit-user-id').value)" class="hidden btn btn-danger w-full mt-3"><i class="fas fa-trash-can"></i> Excluir colaborador</button>
+    </div>
+  </div>
+
+  <div id="modal-mes" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center modal-backdrop sm:p-4">
+    <div class="sheet">
+      <div class="sheet-handle sm:hidden"></div>
+      <h3 class="font-display text-xl font-bold text-strong mb-5">Novo mês de escala</h3>
+      <div class="space-y-4">
+        <div><label class="label" for="form-mes-key">Mês</label><input id="form-mes-key" type="month" class="field" /></div>
+        <div><label class="label" for="form-mes-titulo">Título</label><input id="form-mes-titulo" type="text" placeholder="Ex: Escala de Folga - Outubro 2026" class="field" /></div>
+        <div><label class="label" for="form-mes-copy">Continuar o ciclo de</label><select id="form-mes-copy" class="field"><option value="">— Em branco —</option></select></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-6">
+        <button onclick="closeMesModal()" class="btn btn-ghost">Cancelar</button>
+        <button onclick="saveMes()" class="btn btn-primary">Criar</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-mes" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in">
-      <h3 class="text-xl font-bold mb-4">Novo Mês de Escala</h3>
-      <div class="space-y-3">
-        <div><label class="block text-sm font-medium mb-1">Ano-Mês (YYYY-MM)</label><input id="form-mes-key" type="month" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
-        <div><label class="block text-sm font-medium mb-1">Título / Descrição</label><input id="form-mes-titulo" type="text" placeholder="Ex: Escala de Folga - Setembro 2026" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" /></div>
-        <div><label class="block text-sm font-medium mb-1">Copiar de</label><select id="form-mes-copy" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"><option value="">— Em branco —</option></select></div>
+  <div id="modal-install" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center modal-backdrop sm:p-4" onclick="if (event.target === this) closeInstallModal()">
+    <div class="sheet">
+      <div class="sheet-handle sm:hidden"></div>
+      <div class="flex items-center gap-3 mb-5">
+        <img src="icons/icon-192.png" alt="" class="w-12 h-12 rounded-2xl" />
+        <div>
+          <h3 class="font-display text-xl font-bold text-strong">Instalar o app</h3>
+          <p class="text-xs muted">Escala de Folga • RRP Bioenergia</p>
+        </div>
       </div>
-      <div class="flex gap-2 mt-6">
-        <button onclick="closeMesModal()" class="flex-1 py-2 border border-slate-300 rounded-lg text-sm">Cancelar</button>
-        <button onclick="saveMes()" class="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm">Criar</button>
-      </div>
+      <ol id="install-steps" class="space-y-3 text-strong"></ol>
+      <p class="text-xs muted mt-5">Depois de instalado, o app abre em tela cheia pelo ícone na tela inicial e funciona mesmo sem internet (só leitura).</p>
+      <button onclick="closeInstallModal()" class="btn btn-primary w-full mt-5">Entendi</button>
     </div>
   </div>
 
-  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg text-sm fade-in"></div>
+  <div id="toast" class="hidden"></div>
 
 <!-- Ao lançar nova versão, atualize ?v= para o navegador baixar os scripts novos -->
-<script src="app1.js?v=1.5.0"></script>
-<script src="app2.js?v=1.5.0"></script>
-<script src="app3.js?v=1.5.0"></script>
-<script src="pwa.js?v=1.5.0"></script>
+<script src="app1.js?v=2.0.0"></script>
+<script src="app2.js?v=2.0.0"></script>
+<script src="app3.js?v=2.0.0"></script>
+<script src="pwa.js?v=2.0.0"></script>
 </body>
 </html>

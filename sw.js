@@ -1,7 +1,7 @@
 // Service worker do Portal de Escala de Folga.
 // Estratégia "rede primeiro": online sempre busca a versão nova; sem conexão usa a cópia em cache.
 // Os dados do Supabase nunca são cacheados aqui (o app já guarda a última cópia no localStorage).
-const CACHE = 'escala-folga-v1.5.0';
+const CACHE = 'escala-folga-v2.0.0';
 const CACHEABLE_HOSTS = ['cdn.tailwindcss.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', () => self.skipWaiting());

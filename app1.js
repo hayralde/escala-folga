@@ -112,6 +112,64 @@ function mesPadrao() {
   return anteriores.length ? anteriores[anteriores.length - 1] : keys[0];
 }
 
+// ============================================================
+// APOIO VISUAL
+// ============================================================
+const AVATAR_CORES = ['#174A2B', '#2E7D32', '#D4A017', '#8D6E2F', '#0F3D2E', '#7AC74F', '#4CAF50', '#1B5E20'];
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function iniciais(nome) {
+  const p = String(nome || '').trim().split(/\s+/);
+  return ((p[0] || '')[0] || '').concat(p.length > 1 ? p[p.length - 1][0] : '').toUpperCase();
+}
+
+function avatarCor(matricula) {
+  let h = 0;
+  for (const ch of String(matricula)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return AVATAR_CORES[h % AVATAR_CORES.length];
+}
+
+function avatarHtml(u, size = 44, comStatus = false) {
+  const st = comStatus ? statusHoje(u.matricula) : null;
+  const dot = st ? `<span class="dot" style="background:${st === 'folga' ? 'var(--gold)' : 'var(--muted-2)'}"></span>` : '';
+  const fs = Math.round(size * 0.34);
+  return `<span class="avatar" style="width:${size}px;height:${size}px;font-size:${fs}px;background:${avatarCor(u.matricula)}">${esc(iniciais(u.nome))}${dot}</span>`;
+}
+
+function hojeKey() {
+  const d = new Date();
+  return { mes: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), idx: d.getDate() - 1 };
+}
+
+// 'folga' | 'trabalho' | null (sem escala cadastrada para hoje)
+function statusHoje(matricula) {
+  const { mes, idx } = hojeKey();
+  const arr = DB.schedules[mes]?.data[matricula];
+  if (!arr) return null;
+  return arr[idx] === 'F' ? 'folga' : 'trabalho';
+}
+
+function statusHtml(matricula) {
+  const st = statusHoje(matricula);
+  if (st === 'folga') return '<span class="status status-folga">Folga hoje</span>';
+  if (st === 'trabalho') return '<span class="status status-trab">Trabalhando</span>';
+  return '';
+}
+
+// "ADRIEL SODRE" → "Adriel"
+function primeiroNome(nome) {
+  const p = String(nome || '').trim().split(/\s+/)[0].toLowerCase();
+  return p.charAt(0).toUpperCase() + p.slice(1);
+}
+
+function mesLabel(k) {
+  const [y, m] = k.split('-');
+  return MONTH_NAMES[parseInt(m, 10) - 1] + ' ' + y;
+}
+
 // Ciclo de folga contínuo entre meses: conta os dias a partir de 01/09/2026
 const CICLO_PADRAO = 6;
 function userCiclo(matricula) {
