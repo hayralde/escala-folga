@@ -4,12 +4,12 @@ Visual RRP Bioenergia (verde agro `#174A2B` + dourado milho `#D4A017`), com modo
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 2.0.0
+**Versão:** 2.0.1
 
 ## Acesso
 
 - **Colaborador:** informe a matrícula
-- **Administrador:** senha definida no banco (altere em Configurações)
+- **Administrador:** acesse https://hayralde.github.io/escala-folga/#admin e informe a senha (definida no banco; altere em Ajustes)
 
 ## Funcionalidades
 
