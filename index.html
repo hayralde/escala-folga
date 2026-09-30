@@ -105,9 +105,6 @@
     .icon-btn:active { transform: scale(.95); }
     .avatar { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; flex-shrink: 0; position: relative; }
     .avatar .dot { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--surface); }
-    .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px; }
-    .seg button { height: 40px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted); transition: background .15s, color .15s; }
-    .seg button.active { background: var(--green); color: #fff; box-shadow: 0 4px 12px rgba(23, 74, 43, .25); }
     .fade-in { animation: fadeIn .3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -186,12 +183,7 @@
           </div>
         </div>
         <h1 class="font-display text-xl font-bold text-strong">Escala de Folga</h1>
-        <p class="text-sm muted mb-6">Consulte sua escala ou acesse a administração.</p>
-
-        <div class="seg mb-5">
-          <button id="btn-tipo-user" onclick="setLoginType('user')" class="active"><i class="fas fa-user mr-1.5"></i>Colaborador</button>
-          <button id="btn-tipo-admin" onclick="setLoginType('admin')"><i class="fas fa-shield-halved mr-1.5"></i>Administrador</button>
-        </div>
+        <p class="text-sm muted mb-6" id="login-subtitle">Digite sua matrícula para consultar sua escala.</p>
         <div id="login-user-fields">
           <label class="label" for="input-matricula">Matrícula</label>
           <input id="input-matricula" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex: 779" class="field" />
@@ -209,7 +201,7 @@
         <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
         <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
       </a>
-      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.0.0</span></p>
+      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.0.1</span></p>
     </div>
   </div>
 
@@ -423,7 +415,7 @@
     </main>
 
     <footer class="text-center text-[11px] muted pb-6 tracking-widest uppercase" id="app-footer">
-      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.0.0</span>
+      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.0.1</span>
     </footer>
 
     <button id="fab-add" onclick="openUserModal()" class="fab hidden" title="Adicionar colaborador"><i class="fas fa-plus"></i></button>
@@ -501,9 +493,9 @@
   <div id="toast" class="hidden"></div>
 
 <!-- Ao lançar nova versão, atualize ?v= para o navegador baixar os scripts novos -->
-<script src="app1.js?v=2.0.0"></script>
-<script src="app2.js?v=2.0.0"></script>
-<script src="app3.js?v=2.0.0"></script>
-<script src="pwa.js?v=2.0.0"></script>
+<script src="app1.js?v=2.0.1"></script>
+<script src="app2.js?v=2.0.1"></script>
+<script src="app3.js?v=2.0.1"></script>
+<script src="pwa.js?v=2.0.1"></script>
 </body>
 </html>

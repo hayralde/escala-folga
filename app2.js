@@ -1,4 +1,4 @@
-const APP_VERSION = 'v2.0.0';
+const APP_VERSION = 'v2.0.1';
 
 let saveQueue = Promise.resolve();
 
@@ -13,14 +13,21 @@ function saveDB() {
   return saveQueue;
 }
 
+// A administração não tem botão na tela: abre pelo endereço .../escala-folga/#admin
 function setLoginType(type) {
   loginType = type;
-  document.getElementById('btn-tipo-user').classList.toggle('active', type === 'user');
-  document.getElementById('btn-tipo-admin').classList.toggle('active', type === 'admin');
+  document.getElementById('login-subtitle').textContent = type === 'admin'
+    ? 'Acesso da administração.'
+    : 'Digite sua matrícula para consultar sua escala.';
   document.getElementById('login-user-fields').classList.toggle('hidden', type !== 'user');
   document.getElementById('login-admin-fields').classList.toggle('hidden', type !== 'admin');
   document.getElementById('login-error').classList.add('hidden');
 }
+
+function syncLoginTypeWithUrl() {
+  setLoginType(location.hash === '#admin' ? 'admin' : 'user');
+}
+window.addEventListener('hashchange', syncLoginTypeWithUrl);
 
 // Tema claro/escuro: a escolha fica só neste aparelho
 function toggleTheme() {

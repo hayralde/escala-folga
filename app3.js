@@ -276,6 +276,7 @@ function toast(msg, isError = false) {
 }
 
 syncThemeIcons();
+syncLoginTypeWithUrl();
 document.querySelectorAll('.app-version').forEach(el => { el.textContent = APP_VERSION; });
 loadDB().then(() => {
   renderTitulo();
