@@ -1,14 +1,16 @@
-const APP_VERSION = 'v2.0.1';
+const APP_VERSION = 'v2.1.0';
 
 let saveQueue = Promise.resolve();
 
 // Grava no Supabase (só admin logado). As gravações são enfileiradas para manter a ordem.
 function saveDB() {
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(DB)); } catch (e) {}
+  ALL_DB[currentTeam] = DB;
+  salvarCache();
   if (!adminSenha) return Promise.resolve(false);
   const snapshot = JSON.parse(JSON.stringify(DB));
+  const team = currentTeam;
   saveQueue = saveQueue
-    .then(() => sbRpc('escala_folga_save', { p_password: adminSenha, p_data: snapshot }))
+    .then(() => sbRpc('escala_folga_save', { p_team: team, p_password: adminSenha, p_data: snapshot }))
     .then(() => true, e => { toast('Erro ao salvar no servidor: ' + e.message, true); return false; });
   return saveQueue;
 }
@@ -47,27 +49,33 @@ async function doLogin() {
   const err = document.getElementById('login-error');
   err.classList.add('hidden');
   const showErr = msg => { err.textContent = msg; err.classList.remove('hidden'); };
-  if (!DB) { showErr('Carregando dados, tente novamente em instantes.'); return; }
+  if (!Object.keys(ALL_DB).length) { showErr('Carregando dados, tente novamente em instantes.'); return; }
   if (loginType === 'admin') {
+    // O usuário (Elétrica / Casaforça) define qual ambiente abre
+    const usuario = document.getElementById('input-usuario').value;
     const senha = document.getElementById('input-senha').value;
+    const team = teamDoUsuario(usuario);
+    if (!team) { showErr('Usuário não encontrado. Use Elétrica ou Casaforça.'); return; }
     if (dbOffline) await loadDB();
     if (dbOffline) { showErr('Sem conexão com o servidor. O acesso de administrador requer internet.'); return; }
     let ok = false;
-    try { ok = await sbRpc('escala_folga_check', { p_password: senha }); }
+    try { ok = await sbRpc('escala_folga_check', { p_team: team, p_password: senha }); }
     catch (e) { showErr('Erro ao conectar: ' + e.message); return; }
     if (!ok) { showErr('Senha incorreta.'); return; }
+    try { localStorage.setItem('ef_admin_user', usuario.trim()); } catch (e) {}
     adminSenha = senha;
+    currentTeam = team;
     currentUser = { type: 'admin' };
   } else {
+    // O colaborador entra só com a matrícula; a equipe é descoberta pelos cadastros
     const mat = document.getElementById('input-matricula').value.trim();
-    const user = DB.users.find(u => u.matricula === mat);
-    if (!user) {
-      err.textContent = 'Matrícula não encontrada.';
-      err.classList.remove('hidden');
-      return;
-    }
+    const team = Object.keys(TEAMS).find(t => ALL_DB[t]?.users.some(u => u.matricula === mat));
+    if (!team) { showErr('Matrícula não encontrada.'); return; }
+    const user = ALL_DB[team].users.find(u => u.matricula === mat);
+    currentTeam = team;
     currentUser = { type: 'user', matricula: user.matricula, nome: user.nome };
   }
+  DB = ALL_DB[currentTeam];
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   renderApp();
@@ -76,6 +84,8 @@ async function doLogin() {
 function doLogout() {
   currentUser = null;
   adminSenha = null;
+  currentTeam = null;
+  DB = null;
   editMode = false;
   document.getElementById('app').classList.add('hidden');
   document.getElementById('login-screen').classList.remove('hidden');
@@ -85,9 +95,8 @@ function doLogout() {
 }
 
 function renderTitulo() {
-  const titulo = DB.config.titulo || 'Elétrica & Cogeração';
-  document.getElementById('header-subtitle').textContent = titulo;
-  document.getElementById('login-titulo').textContent = titulo;
+  if (DB) document.getElementById('header-subtitle').textContent = DB.config.titulo || TEAMS[currentTeam].nome;
+  document.getElementById('login-titulo').textContent = Object.keys(TEAMS).map(t => TEAMS[t].nome).join(' • ');
 }
 
 function renderApp() {
@@ -146,6 +155,8 @@ function renderUserEscala() {
   document.getElementById('user-cal-title').textContent = mesLabel(mesKey);
   document.getElementById('user-ciclo').textContent = 'Folga a cada ' + ciclo + ' dias';
   document.getElementById('user-status').innerHTML = statusHtml(currentUser.matricula);
+  const turno = DB.users.find(u => u.matricula === currentUser.matricula)?.turno;
+  document.getElementById('user-turno').innerHTML = turno ? `<span class="pill pill-gold font-semibold">Turno ${esc(turno)}</span>` : '';
   document.getElementById('stat-folgas').textContent = folgas.length;
   document.getElementById('stat-trabalho').textContent = sched.diasNoMes - folgas.length;
   const today = new Date();
@@ -181,7 +192,7 @@ function renderDashboard() {
     + (users.length > 4 ? `<span class="avatar" style="width:36px;height:36px;font-size:12px;background:#F5F1E8;color:#174A2B;box-shadow:0 0 0 2px #2E7D32">+${users.length - 4}</span>` : '');
   const mes = mesPadrao();
   const sched = DB.schedules[mes];
-  document.getElementById('dash-mes-ativo').textContent = mes ? mesLabel(mes) + ' • ' + (DB.config.titulo || 'Elétrica & Cogeração') : '—';
+  document.getElementById('dash-mes-ativo').textContent = mes ? mesLabel(mes) + ' • ' + (DB.config.titulo || TEAMS[currentTeam].nome) : '—';
   const hoje = new Date();
   document.getElementById('dash-hoje-data').textContent = String(hoje.getDate()).padStart(2, '0') + '/' + String(hoje.getMonth() + 1).padStart(2, '0');
   const deFolga = users.filter(u => statusHoje(u.matricula) === 'folga');

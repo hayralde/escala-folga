@@ -4,12 +4,17 @@ Visual RRP Bioenergia (verde agro `#174A2B` + dourado milho `#D4A017`), com modo
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 2.0.1
+**Versão:** 2.1.0
 
 ## Acesso
 
-- **Colaborador:** informe a matrícula
-- **Administrador:** acesse https://hayralde.github.io/escala-folga/#admin e informe a senha (definida no banco; altere em Ajustes)
+O portal tem duas equipes com ambientes separados: **Elétrica** e **Casa de Força**.
+
+- **Colaborador:** informe a matrícula — o portal identifica a equipe automaticamente
+- **Administrador:** acesse https://hayralde.github.io/escala-folga/#admin e informe o usuário e a senha da equipe:
+  - usuário `Elétrica` → ambiente da Elétrica & Cogeração
+  - usuário `Casaforça` → ambiente da Casa de Força
+  - cada equipe tem a própria senha (no banco, criptografada); altere em Ajustes
 
 ## Funcionalidades
 
@@ -34,10 +39,10 @@ No Android/Chrome/Edge aparece o botão **Instalar app** (tela de login e cabeç
 
 ## Dados
 
-Os dados ficam no Supabase (tabela `escala_folga`), compartilhados por todos os acessos:
+Os dados ficam no Supabase (tabela `escala_folga`, um registro por equipe: `main` = Elétrica, `casaforca` = Casa de Força):
 
 - Leitura pública (colaboradores consultam pela matrícula)
 - Gravação apenas pelo administrador — a senha é conferida no banco (hash bcrypt)
 - Sem conexão, o portal mostra a última cópia salva no aparelho (somente leitura)
 
-Estrutura do banco: `supabase/escala_folga.sql`.
+Estrutura do banco: `supabase/escala_folga.sql` e `supabase/escala_folga_equipes.sql`.
