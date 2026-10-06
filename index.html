@@ -83,7 +83,7 @@
     .card-green::after { content: ''; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(212, 160, 23, .45), transparent 70%); }
     .muted { color: var(--muted); }
     .text-strong { color: var(--text-strong); }
-    .pill { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font-size: 12px; padding: .3rem .75rem; }
+    .pill { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font-size: 12px; padding: .3rem .75rem; white-space: nowrap; }
     .pill-gold { background: var(--gold-soft); border-color: rgba(212, 160, 23, .45); color: #8D6E2F; }
     :root[data-theme="dark"] .pill-gold { color: var(--gold); }
     .chip-mat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; padding: .1rem .45rem; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
@@ -188,9 +188,15 @@
           <label class="label" for="input-matricula">Matrícula</label>
           <input id="input-matricula" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex: 779" class="field" />
         </div>
-        <div id="login-admin-fields" class="hidden">
-          <label class="label" for="input-senha">Senha do administrador</label>
-          <input id="input-senha" type="password" placeholder="Senha" class="field" />
+        <div id="login-admin-fields" class="hidden space-y-4">
+          <div>
+            <label class="label" for="input-usuario">Usuário</label>
+            <input id="input-usuario" type="text" autocomplete="username" autocapitalize="off" placeholder="Elétrica ou Casaforça" class="field" />
+          </div>
+          <div>
+            <label class="label" for="input-senha">Senha</label>
+            <input id="input-senha" type="password" autocomplete="current-password" placeholder="Senha" class="field" />
+          </div>
         </div>
         <button onclick="doLogin()" class="btn btn-primary w-full mt-5" style="height: 50px">Entrar <i class="fas fa-arrow-right"></i></button>
         <div id="login-error" class="hidden mt-4 text-sm text-center py-2.5 rounded-2xl" style="background: var(--danger-soft); color: var(--danger)"></div>
@@ -201,7 +207,7 @@
         <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
         <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
       </a>
-      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.0.1</span></p>
+      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.1.0</span></p>
     </div>
   </div>
 
@@ -237,6 +243,7 @@
             <p class="text-sm muted" id="user-mes-info">Sua escala de folga</p>
           </div>
           <div class="flex items-center gap-2">
+            <span id="user-turno"></span>
             <span id="user-status"></span>
             <select id="user-mes-select" onchange="renderUserEscala()" class="field select-pill w-auto"></select>
           </div>
@@ -415,7 +422,7 @@
     </main>
 
     <footer class="text-center text-[11px] muted pb-6 tracking-widest uppercase" id="app-footer">
-      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.0.1</span>
+      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.1.0</span>
     </footer>
 
     <button id="fab-add" onclick="openUserModal()" class="fab hidden" title="Adicionar colaborador"><i class="fas fa-plus"></i></button>
@@ -440,10 +447,9 @@
         <div><label class="label" for="form-nome">Nome completo *</label><input id="form-nome" type="text" class="field" /></div>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="label" for="form-matricula">Matrícula *</label><input id="form-matricula" type="text" inputmode="numeric" class="field" /></div>
-          <div><label class="label" for="form-setor">Setor</label>
-            <select id="form-setor" class="field"><option value="">—</option><option>Elétrica</option><option>Cogeração</option></select>
-          </div>
+          <div><label class="label" for="form-turno">Turno</label><select id="form-turno" class="field"></select></div>
         </div>
+        <div id="field-setor"><label class="label" for="form-setor">Setor</label><select id="form-setor" class="field"></select></div>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="label" for="form-dia-folga">Dia da folga</label><input id="form-dia-folga" type="number" min="1" max="31" placeholder="Ex: 4" class="field" /></div>
           <div><label class="label" for="form-ciclo">Ciclo (dias)</label><input id="form-ciclo" type="number" min="2" max="31" value="6" class="field" /></div>
@@ -493,9 +499,9 @@
   <div id="toast" class="hidden"></div>
 
 <!-- Ao lançar nova versão, atualize ?v= para o navegador baixar os scripts novos -->
-<script src="app1.js?v=2.0.1"></script>
-<script src="app2.js?v=2.0.1"></script>
-<script src="app3.js?v=2.0.1"></script>
-<script src="pwa.js?v=2.0.1"></script>
+<script src="app1.js?v=2.1.0"></script>
+<script src="app2.js?v=2.1.0"></script>
+<script src="app3.js?v=2.1.0"></script>
+<script src="pwa.js?v=2.1.0"></script>
 </body>
 </html>

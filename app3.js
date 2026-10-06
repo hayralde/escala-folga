@@ -16,7 +16,8 @@ function renderUsers() {
         <span class="block font-semibold text-strong truncate">${esc(u.nome)}</span>
         <span class="flex items-center gap-2 mt-1 text-xs muted">
           <span class="chip-mat">${esc(u.matricula)}</span>
-          <span>${esc(u.setor || 'Sem setor')}</span>
+          ${u.turno ? `<span class="pill pill-gold" style="padding:.05rem .5rem;font-size:11px">Turno ${esc(u.turno)}</span>` : ''}
+          ${TEAMS[currentTeam].setores.length ? `<span>${esc(u.setor || 'Sem setor')}</span>` : ''}
           <span>• ${userCiclo(u.matricula)} dias</span>
         </span>
       </span>
@@ -25,7 +26,16 @@ function renderUsers() {
     </button>`).join('') || '<p class="text-sm muted">Nenhum colaborador</p>';
 }
 
+// Opções de setor e turno conforme a equipe (a Casa de Força não tem setor)
+function prepararCamposEquipe() {
+  const setores = TEAMS[currentTeam].setores;
+  document.getElementById('field-setor').classList.toggle('hidden', !setores.length);
+  document.getElementById('form-setor').innerHTML = '<option value="">—</option>' + setores.map(s => `<option>${esc(s)}</option>`).join('');
+  document.getElementById('form-turno').innerHTML = '<option value="">—</option>' + TURNOS.map(t => `<option value="${t}">${t === 'ADM' ? 'ADM (administrativo)' : 'Turno ' + t}</option>`).join('');
+}
+
 function openUserModal(matricula) {
+  prepararCamposEquipe();
   document.getElementById('modal-user').classList.remove('hidden');
   document.getElementById('modal-user').classList.add('flex');
   const diaInput = document.getElementById('form-dia-folga');
@@ -38,6 +48,7 @@ function openUserModal(matricula) {
     document.getElementById('form-nome').value = u.nome;
     document.getElementById('form-ciclo').value = u.ciclo || CICLO_PADRAO;
     document.getElementById('form-setor').value = u.setor || '';
+    document.getElementById('form-turno').value = u.turno || '';
     document.getElementById('btn-delete-user').classList.remove('hidden');
     const dias = DB.schedules[anchorMes()]?.data[matricula] || [];
     const primeira = dias.findIndex(d => d === 'F');
@@ -50,6 +61,7 @@ function openUserModal(matricula) {
     document.getElementById('form-nome').value = '';
     document.getElementById('form-ciclo').value = CICLO_PADRAO;
     document.getElementById('form-setor').value = '';
+    document.getElementById('form-turno').value = '';
     document.getElementById('btn-delete-user').classList.add('hidden');
     diaInput.value = '';
   }
@@ -84,6 +96,7 @@ function saveUser() {
   const diaFolga = document.getElementById('form-dia-folga').value.trim();
   const ciclo = parseInt(document.getElementById('form-ciclo').value, 10) || CICLO_PADRAO;
   const setor = document.getElementById('form-setor').value;
+  const turno = document.getElementById('form-turno').value;
   if (!mat || !nome) { toast('Preencha matrícula e nome', true); return; }
   if (ciclo < 2 || ciclo > 31) { toast('Ciclo deve ser entre 2 e 31 dias', true); return; }
   if (diaFolga) {
@@ -96,13 +109,18 @@ function saveUser() {
       u.nome = nome;
       if (ciclo === CICLO_PADRAO) delete u.ciclo; else u.ciclo = ciclo;
       if (setor) u.setor = setor; else delete u.setor;
+      if (turno) u.turno = turno; else delete u.turno;
     }
     if (diaFolga) applyCycleToUser(editId, diaFolga);
   } else {
     if (DB.users.some(x => x.matricula === mat)) { toast('Matrícula já existe', true); return; }
+    // A matrícula identifica o colaborador no login: não pode repetir entre equipes
+    const outra = Object.keys(TEAMS).find(t => t !== currentTeam && ALL_DB[t]?.users.some(x => x.matricula === mat));
+    if (outra) { toast('Matrícula já cadastrada na equipe ' + TEAMS[outra].nome, true); return; }
     const novo = { matricula: mat, nome };
     if (ciclo !== CICLO_PADRAO) novo.ciclo = ciclo;
     if (setor) novo.setor = setor;
+    if (turno) novo.turno = turno;
     DB.users.push(novo);
     Object.keys(DB.schedules).forEach(k => {
       DB.schedules[k].data[mat] = Array(DB.schedules[k].diasNoMes).fill('');
@@ -214,7 +232,7 @@ async function changeAdminPassword() {
   const nova = document.getElementById('config-senha').value;
   if (!nova || nova.length < 4) { toast('Senha deve ter ao menos 4 caracteres', true); return; }
   try {
-    await sbRpc('escala_folga_change_password', { p_old: adminSenha, p_new: nova });
+    await sbRpc('escala_folga_change_password', { p_team: currentTeam, p_old: adminSenha, p_new: nova });
   } catch (e) { toast('Erro ao alterar senha: ' + e.message, true); return; }
   adminSenha = nova;
   toast('Senha alterada!');
@@ -222,15 +240,15 @@ async function changeAdminPassword() {
 }
 
 function saveConfig() {
-  DB.config.titulo = document.getElementById('config-titulo').value.trim() || 'Elétrica & Cogeração';
+  DB.config.titulo = document.getElementById('config-titulo').value.trim() || TEAMS[currentTeam].nome;
   saveDB();
   renderTitulo();
   toast('Configurações salvas!');
 }
 
 function resetAllData() {
-  if (!confirm('Isso apagará TODOS os dados e restaurará a escala original de Setembro/2026. Continuar?')) return;
-  DB = JSON.parse(JSON.stringify(INITIAL_DATA));
+  if (!confirm('Isso apagará TODOS os dados da equipe ' + TEAMS[currentTeam].nome + ' e restaurará a escala original de Setembro/2026. Continuar?')) return;
+  DB = JSON.parse(JSON.stringify(TEAMS[currentTeam].inicial));
   saveDB();
   toast('Dados resetados');
   renderApp();
@@ -240,7 +258,7 @@ function exportData() {
   const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'escala-folga-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = 'escala-folga-' + currentTeam + '-' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
   toast('Backup exportado!');
 }
@@ -277,6 +295,7 @@ function toast(msg, isError = false) {
 
 syncThemeIcons();
 syncLoginTypeWithUrl();
+try { document.getElementById('input-usuario').value = localStorage.getItem('ef_admin_user') || ''; } catch (e) {}
 document.querySelectorAll('.app-version').forEach(el => { el.textContent = APP_VERSION; });
 loadDB().then(() => {
   renderTitulo();

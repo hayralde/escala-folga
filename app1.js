@@ -92,10 +92,35 @@ const INITIAL_DATA = {
 };
 
 
+// Casa de Força (referência: planilha de folga 15/09–15/10/2026)
+const INITIAL_CASAFORCA = {"config":{"titulo":"Casa de Força"},"users":[{"matricula":"196","nome":"TIAGO BOER DE OLIVEIRA","turno":"ADM","ciclo":7},{"matricula":"224","nome":"BRUNO JHONATAN SILVA SOUZA","turno":"A"},{"matricula":"757","nome":"WANDERSON FERREIRA","turno":"B"},{"matricula":"203","nome":"FABIANO DOS SANTOS CORREIA JUNIOR","turno":"B"},{"matricula":"776","nome":"MAYCON SILVA DE OLIVEIRA","turno":"C"},{"matricula":"189","nome":"LUIZ ALVES DA MATA","turno":"C"}],"schedules":{"2026-09":{"titulo":"ESCALA DE FOLGA DO MÊS DE SETEMBRO 2026","diasNoMes":30,"data":{"196":["","","","","","F","","","","","","","F","","","","","","","F","","","","","","","F","","",""],"224":["","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","",""],"757":["F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","",""],"203":["","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F",""],"776":["","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","",""],"189":["","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F"]}},"2026-10":{"titulo":"ESCALA DE FOLGA DO MÊS DE OUTUBRO 2026","diasNoMes":31,"data":{"196":["","","","F","","","","","","","F","","","","","","","F","","","","","","","F","","","","","",""],"224":["","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","",""],"757":["F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F"],"203":["","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","",""],"776":["","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","",""],"189":["","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F",""]}},"2026-11":{"titulo":"ESCALA DE FOLGA DO MÊS DE NOVEMBRO 2026","diasNoMes":30,"data":{"196":["F","","","","","","","F","","","","","","","F","","","","","","","F","","","","","","","F",""],"224":["","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","",""],"757":["","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F"],"203":["","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","",""],"776":["F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","",""],"189":["","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F",""]}},"2026-12":{"titulo":"ESCALA DE FOLGA DO MÊS DE DEZEMBRO 2026","diasNoMes":31,"data":{"196":["","","","","","F","","","","","","","F","","","","","","","F","","","","","","","F","","","",""],"224":["","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","",""],"757":["","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F",""],"203":["","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","",""],"776":["F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F"],"189":["","","","","F","","","","","","F","","","","","","F","","","","","","F","","","","","","F","",""]}}}};
+
+// ============================================================
+// EQUIPES — cada uma tem seus dados e sua senha de admin no banco
+// ============================================================
+// id = registro em escala_folga; usuarios = como o admin pode digitar no login
+const TEAMS = {
+  main: { nome: 'Elétrica', usuarios: ['eletrica'], setores: ['Elétrica', 'Cogeração'], inicial: INITIAL_DATA },
+  casaforca: { nome: 'Casa de Força', usuarios: ['casaforca', 'casadeforca'], setores: [], inicial: INITIAL_CASAFORCA }
+};
+const TURNOS = ['A', 'B', 'C', 'ADM'];
+
+// "Casa de Força" → "casadeforca"
+function normalizarUsuario(s) {
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function teamDoUsuario(usuario) {
+  const n = normalizarUsuario(usuario);
+  return Object.keys(TEAMS).find(t => TEAMS[t].usuarios.includes(n)) || null;
+}
+
 // ============================================================
 // ESTADO
 // ============================================================
-let DB = null;
+let ALL_DB = {};          // dados de todas as equipes, por id
+let currentTeam = null;   // equipe do usuário logado
+let DB = null;            // atalho para ALL_DB[currentTeam]
 let currentUser = null;
 let editMode = false;
 let loginType = 'user';
@@ -206,18 +231,38 @@ function sbRpc(fn, args) {
   return sbFetch('/rest/v1/rpc/' + fn, { method: 'POST', body: JSON.stringify(args) });
 }
 
+function salvarCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ equipes: ALL_DB })); } catch (e) {}
+}
+
+function lerCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (c && c.equipes) return c.equipes;
+    if (c && c.users && c.schedules) return { main: c };   // formato antigo (só Elétrica)
+  } catch (e) {}
+  return {};
+}
+
+const valido = d => d && d.users && d.schedules;
+
 async function loadDB() {
   try {
-    const rows = await sbFetch('/rest/v1/escala_folga?id=eq.main&select=data');
+    const rows = await sbFetch('/rest/v1/escala_folga?id=in.(' + Object.keys(TEAMS).join(',') + ')&select=id,data');
     if (!rows.length) throw new Error('sem dados');
-    DB = rows[0].data;
+    const novo = {};
+    rows.forEach(r => { if (TEAMS[r.id] && valido(r.data)) novo[r.id] = r.data; });
+    // Equipe ausente no servidor: usa os dados iniciais dela
+    Object.keys(TEAMS).forEach(t => { if (!novo[t]) novo[t] = JSON.parse(JSON.stringify(TEAMS[t].inicial)); });
+    ALL_DB = novo;
     dbOffline = false;
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(DB)); } catch (e) {}
+    salvarCache();
   } catch (e) {
     // Sem conexão com o banco: usa a última cópia do navegador (somente leitura)
-    let cached = null;
-    try { cached = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e2) {}
-    DB = (cached && cached.users && cached.schedules) ? cached : JSON.parse(JSON.stringify(INITIAL_DATA));
+    const cache = lerCache();
+    ALL_DB = {};
+    Object.keys(TEAMS).forEach(t => { ALL_DB[t] = valido(cache[t]) ? cache[t] : JSON.parse(JSON.stringify(TEAMS[t].inicial)); });
     dbOffline = true;
   }
+  DB = currentTeam ? ALL_DB[currentTeam] : null;
 }
