@@ -1,4 +1,4 @@
-const APP_VERSION = 'v2.1.0';
+const APP_VERSION = 'v2.2.0';
 
 let saveQueue = Promise.resolve();
 
@@ -72,8 +72,28 @@ async function doLogin() {
     const team = Object.keys(TEAMS).find(t => ALL_DB[t]?.users.some(u => u.matricula === mat));
     if (!team) { showErr('Matrícula não encontrada.'); return; }
     const user = ALL_DB[team].users.find(u => u.matricula === mat);
-    currentTeam = team;
-    currentUser = { type: 'user', matricula: user.matricula, nome: user.nome };
+    const somenteEscala = loginSomenteEscala;
+    loginSomenteEscala = false;
+    if (user.admin && !somenteEscala) {
+      // Matrícula de administrador: pede a senha da equipe antes de abrir o painel
+      const box = document.getElementById('login-mat-senha');
+      const senhaInput = document.getElementById('input-mat-senha');
+      if (box.classList.contains('hidden')) { box.classList.remove('hidden'); senhaInput.focus(); return; }
+      const senha = senhaInput.value;
+      if (!senha) { showErr('Digite a senha de administrador.'); senhaInput.focus(); return; }
+      if (dbOffline) await loadDB();
+      if (dbOffline) { showErr('Sem conexão com o servidor. O acesso de administrador requer internet.'); return; }
+      let ok = false;
+      try { ok = await sbRpc('escala_folga_check', { p_team: team, p_password: senha }); }
+      catch (e) { showErr('Erro ao conectar: ' + e.message); return; }
+      if (!ok) { showErr('Senha incorreta.'); return; }
+      adminSenha = senha;
+      currentTeam = team;
+      currentUser = { type: 'admin', matricula: user.matricula, nome: user.nome };
+    } else {
+      currentTeam = team;
+      currentUser = { type: 'user', matricula: user.matricula, nome: user.nome };
+    }
   }
   DB = ALL_DB[currentTeam];
   document.getElementById('login-screen').classList.add('hidden');
@@ -81,7 +101,21 @@ async function doLogin() {
   renderApp();
 }
 
+let loginSomenteEscala = false;
+
+// Administrador que só quer consultar a própria escala, sem senha
+function entrarSomenteEscala() {
+  loginSomenteEscala = true;
+  doLogin();
+}
+
+function esconderSenhaMatricula() {
+  document.getElementById('login-mat-senha').classList.add('hidden');
+  document.getElementById('input-mat-senha').value = '';
+}
+
 function doLogout() {
+  esconderSenhaMatricula();
   currentUser = null;
   adminSenha = null;
   currentTeam = null;
@@ -157,6 +191,8 @@ function renderUserEscala() {
   document.getElementById('user-status').innerHTML = statusHtml(currentUser.matricula);
   const turno = DB.users.find(u => u.matricula === currentUser.matricula)?.turno;
   document.getElementById('user-turno').innerHTML = turno ? `<span class="pill pill-gold font-semibold">Turno ${esc(turno)}</span>` : '';
+  const horario = DB.users.find(u => u.matricula === currentUser.matricula)?.horario;
+  document.getElementById('user-horario').innerHTML = horario ? `<span class="pill"><i class="far fa-clock"></i>${esc(horario)}</span>` : '';
   document.getElementById('stat-folgas').textContent = folgas.length;
   document.getElementById('stat-trabalho').textContent = sched.diasNoMes - folgas.length;
   const today = new Date();

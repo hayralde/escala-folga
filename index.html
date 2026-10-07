@@ -187,6 +187,12 @@
         <div id="login-user-fields">
           <label class="label" for="input-matricula">Matrícula</label>
           <input id="input-matricula" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex: 779" class="field" />
+          <!-- Aparece quando a matrícula é de um administrador da equipe -->
+          <div id="login-mat-senha" class="hidden mt-4">
+            <label class="label" for="input-mat-senha"><i class="fas fa-shield-halved mr-1" style="color:var(--gold)"></i>Senha de administrador</label>
+            <input id="input-mat-senha" type="password" autocomplete="current-password" placeholder="Senha" class="field" />
+            <button type="button" onclick="entrarSomenteEscala()" class="text-xs muted underline mt-2">Ver apenas minha escala</button>
+          </div>
         </div>
         <div id="login-admin-fields" class="hidden space-y-4">
           <div>
@@ -207,7 +213,7 @@
         <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
         <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
       </a>
-      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.1.0</span></p>
+      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.2.0</span></p>
     </div>
   </div>
 
@@ -242,8 +248,9 @@
             <h2 class="font-display text-2xl font-bold text-strong" id="user-welcome">Olá!</h2>
             <p class="text-sm muted" id="user-mes-info">Sua escala de folga</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <span id="user-turno"></span>
+            <span id="user-horario"></span>
             <span id="user-status"></span>
             <select id="user-mes-select" onchange="renderUserEscala()" class="field select-pill w-auto"></select>
           </div>
@@ -422,7 +429,7 @@
     </main>
 
     <footer class="text-center text-[11px] muted pb-6 tracking-widest uppercase" id="app-footer">
-      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.1.0</span>
+      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.2.0</span>
     </footer>
 
     <button id="fab-add" onclick="openUserModal()" class="fab hidden" title="Adicionar colaborador"><i class="fas fa-plus"></i></button>
@@ -450,6 +457,11 @@
           <div><label class="label" for="form-turno">Turno</label><select id="form-turno" class="field"></select></div>
         </div>
         <div id="field-setor"><label class="label" for="form-setor">Setor</label><select id="form-setor" class="field"></select></div>
+        <div><label class="label" for="form-horario">Horário (opcional)</label><input id="form-horario" type="text" placeholder="Ex: Seg a Sex 07h–17h · Sáb 07h–11h" class="field" /></div>
+        <label class="flex items-center gap-3 card px-4 py-3 cursor-pointer" style="box-shadow:none">
+          <input id="form-admin" type="checkbox" class="w-5 h-5" style="accent-color: var(--green-2)" />
+          <span class="text-sm"><span class="font-semibold text-strong">Administrador da equipe</span><span class="block text-xs muted">Ao digitar a matrícula no login, pede a senha da equipe e abre o painel de admin.</span></span>
+        </label>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="label" for="form-dia-folga">Dia da folga</label><input id="form-dia-folga" type="number" min="1" max="31" placeholder="Ex: 4" class="field" /></div>
           <div><label class="label" for="form-ciclo">Ciclo (dias)</label><input id="form-ciclo" type="number" min="2" max="31" value="6" class="field" /></div>
@@ -499,9 +511,9 @@
   <div id="toast" class="hidden"></div>
 
 <!-- Ao lançar nova versão, atualize ?v= para o navegador baixar os scripts novos -->
-<script src="app1.js?v=2.1.0"></script>
-<script src="app2.js?v=2.1.0"></script>
-<script src="app3.js?v=2.1.0"></script>
-<script src="pwa.js?v=2.1.0"></script>
+<script src="app1.js?v=2.2.0"></script>
+<script src="app2.js?v=2.2.0"></script>
+<script src="app3.js?v=2.2.0"></script>
+<script src="pwa.js?v=2.2.0"></script>
 </body>
 </html>

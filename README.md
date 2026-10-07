@@ -4,13 +4,14 @@ Visual RRP Bioenergia (verde agro `#174A2B` + dourado milho `#D4A017`), com modo
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 2.1.0
+**Versão:** 2.2.0
 
 ## Acesso
 
 O portal tem duas equipes com ambientes separados: **Elétrica** e **Casa de Força**.
 
 - **Colaborador:** informe a matrícula — o portal identifica a equipe automaticamente
+- **Administrador pela matrícula:** colaboradores marcados como "Administrador da equipe" no cadastro, ao digitar a matrícula, recebem um campo de senha; com a senha da equipe abre o painel de admin (ou "Ver apenas minha escala" sem senha)
 - **Administrador:** acesse https://hayralde.github.io/escala-folga/#admin e informe o usuário e a senha da equipe:
   - usuário `Elétrica` → ambiente da Elétrica & Cogeração
   - usuário `Casaforça` → ambiente da Casa de Força

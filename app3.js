@@ -16,6 +16,7 @@ function renderUsers() {
         <span class="block font-semibold text-strong truncate">${esc(u.nome)}</span>
         <span class="flex items-center gap-2 mt-1 text-xs muted">
           <span class="chip-mat">${esc(u.matricula)}</span>
+          ${u.admin ? `<span class="pill" style="padding:.05rem .5rem;font-size:11px;background:var(--green);color:#fff;border-color:transparent"><i class="fas fa-shield-halved" style="color:#FFD35C"></i>Admin</span>` : ''}
           ${u.turno ? `<span class="pill pill-gold" style="padding:.05rem .5rem;font-size:11px">Turno ${esc(u.turno)}</span>` : ''}
           ${TEAMS[currentTeam].setores.length ? `<span>${esc(u.setor || 'Sem setor')}</span>` : ''}
           <span>• ${userCiclo(u.matricula)} dias</span>
@@ -49,6 +50,8 @@ function openUserModal(matricula) {
     document.getElementById('form-ciclo').value = u.ciclo || CICLO_PADRAO;
     document.getElementById('form-setor').value = u.setor || '';
     document.getElementById('form-turno').value = u.turno || '';
+    document.getElementById('form-horario').value = u.horario || '';
+    document.getElementById('form-admin').checked = !!u.admin;
     document.getElementById('btn-delete-user').classList.remove('hidden');
     const dias = DB.schedules[anchorMes()]?.data[matricula] || [];
     const primeira = dias.findIndex(d => d === 'F');
@@ -62,6 +65,8 @@ function openUserModal(matricula) {
     document.getElementById('form-ciclo').value = CICLO_PADRAO;
     document.getElementById('form-setor').value = '';
     document.getElementById('form-turno').value = '';
+    document.getElementById('form-horario').value = '';
+    document.getElementById('form-admin').checked = false;
     document.getElementById('btn-delete-user').classList.add('hidden');
     diaInput.value = '';
   }
@@ -97,6 +102,8 @@ function saveUser() {
   const ciclo = parseInt(document.getElementById('form-ciclo').value, 10) || CICLO_PADRAO;
   const setor = document.getElementById('form-setor').value;
   const turno = document.getElementById('form-turno').value;
+  const horario = document.getElementById('form-horario').value.trim();
+  const admin = document.getElementById('form-admin').checked;
   if (!mat || !nome) { toast('Preencha matrícula e nome', true); return; }
   if (ciclo < 2 || ciclo > 31) { toast('Ciclo deve ser entre 2 e 31 dias', true); return; }
   if (diaFolga) {
@@ -110,6 +117,8 @@ function saveUser() {
       if (ciclo === CICLO_PADRAO) delete u.ciclo; else u.ciclo = ciclo;
       if (setor) u.setor = setor; else delete u.setor;
       if (turno) u.turno = turno; else delete u.turno;
+      if (horario) u.horario = horario; else delete u.horario;
+      if (admin) u.admin = true; else delete u.admin;
     }
     if (diaFolga) applyCycleToUser(editId, diaFolga);
   } else {
@@ -121,6 +130,8 @@ function saveUser() {
     if (ciclo !== CICLO_PADRAO) novo.ciclo = ciclo;
     if (setor) novo.setor = setor;
     if (turno) novo.turno = turno;
+    if (horario) novo.horario = horario;
+    if (admin) novo.admin = true;
     DB.users.push(novo);
     Object.keys(DB.schedules).forEach(k => {
       DB.schedules[k].data[mat] = Array(DB.schedules[k].diasNoMes).fill('');
@@ -302,4 +313,7 @@ loadDB().then(() => {
   if (dbOffline) toast('Sem conexão com o servidor — exibindo a última cópia salva neste aparelho', true);
 });
 document.getElementById('input-matricula').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('input-mat-senha').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+// Trocou a matrícula: a caixa de senha só vale para a matrícula de admin já validada
+document.getElementById('input-matricula').addEventListener('input', esconderSenhaMatricula);
 document.getElementById('input-senha').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
