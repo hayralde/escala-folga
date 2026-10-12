@@ -67,6 +67,13 @@
       --nav-bg: rgba(23, 42, 30, .92);
     }
     .hidden { display: none !important; }
+    /* Barra de instalação no topo (estilo aviso do sistema) */
+    :root { --banner-h: 0px; }
+    body { padding-top: var(--banner-h); transition: padding-top .25s ease; }
+    #install-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 65; height: 60px; padding: 0 12px; padding-top: env(safe-area-inset-top);
+      display: flex; align-items: center; gap: 10px; background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      transform: translateY(-110%); transition: transform .25s ease; }
+    #install-banner.show { transform: translateY(0); }
     .only-desktop { display: none; }
     @media (min-width: 640px) { .only-desktop { display: inline-flex; } }
     html { background: var(--bg); }
@@ -166,6 +173,17 @@
 </head>
 <body class="min-h-screen">
 
+  <!-- Barra de instalação no topo: aparece enquanto o app não estiver instalado -->
+  <div id="install-banner" role="region" aria-label="Instalar o app">
+    <img src="icons/icon-192.png" alt="" class="w-9 h-9 rounded-xl shrink-0" />
+    <div class="flex-1 min-w-0 leading-tight">
+      <div class="text-sm font-semibold text-strong truncate">Instalar Escala Folga</div>
+      <div class="text-xs muted truncate">Acesso rápido pela tela inicial</div>
+    </div>
+    <button onclick="instalarPelaBarra()" class="btn btn-primary shrink-0" style="height: 34px; padding: 0 14px; font-size: 13px">Instalar</button>
+    <button onclick="fecharBarraInstalacao()" class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center muted" aria-label="Fechar"><i class="fas fa-xmark"></i></button>
+  </div>
+
   <!-- ================= LOGIN ================= -->
   <div id="login-screen" class="min-h-screen bg-deco flex flex-col items-center justify-center px-4 py-8">
     <div class="w-full max-w-md">
@@ -213,13 +231,13 @@
         <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
         <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
       </a>
-      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.3.1</span></p>
+      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.4.0</span></p>
     </div>
   </div>
 
   <!-- ================= APP ================= -->
   <div id="app" class="hidden min-h-screen bg-deco flex flex-col">
-    <header class="sticky top-0 z-30" style="background: var(--nav-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border)">
+    <header class="sticky top-0 z-30" style="top: var(--banner-h); background: var(--nav-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border)">
       <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style="background: var(--surface); border: 1px solid var(--border)">
@@ -429,7 +447,7 @@
     </main>
 
     <footer class="text-center text-[11px] muted pb-6 tracking-widest uppercase" id="app-footer">
-      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.3.1</span>
+      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.4.0</span>
     </footer>
 
     <button id="fab-add" onclick="openUserModal()" class="fab hidden" title="Adicionar colaborador"><i class="fas fa-plus"></i></button>
@@ -511,9 +529,9 @@
   <div id="toast" class="hidden"></div>
 
 <!-- Ao lançar nova versão, atualize ?v= para o navegador baixar os scripts novos -->
-<script src="app1.js?v=2.3.1"></script>
-<script src="app2.js?v=2.3.1"></script>
-<script src="app3.js?v=2.3.1"></script>
-<script src="pwa.js?v=2.3.1"></script>
+<script src="app1.js?v=2.4.0"></script>
+<script src="app2.js?v=2.4.0"></script>
+<script src="app3.js?v=2.4.0"></script>
+<script src="pwa.js?v=2.4.0"></script>
 </body>
 </html>

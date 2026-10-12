@@ -103,6 +103,7 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 
 window.addEventListener('appinstalled', () => {
+  esconderBarraInstalacao();
   installPrompt = null;
   setInstallVisible(false);
   closeInstallModal();
@@ -110,6 +111,45 @@ window.addEventListener('appinstalled', () => {
 });
 
 setInstallVisible(!isStandalone());
+
+// ============================================================
+// BARRA NO TOPO (estilo aviso do sistema)
+// ============================================================
+// Aparece enquanto o app não estiver instalado; o ✕ esconde por 3 dias neste aparelho.
+try { localStorage.removeItem('ef_pwa_convite_dispensado'); } catch (e) {}
+const BARRA_KEY = 'ef_barra_instalar_fechada';
+const BARRA_DIAS = 3;
+
+function barraFechadaRecentemente() {
+  try {
+    const t = parseInt(localStorage.getItem(BARRA_KEY), 10);
+    return t && (Date.now() - t) < BARRA_DIAS * 86400000;
+  } catch (e) { return false; }
+}
+
+function mostrarBarraInstalacao() {
+  document.getElementById('install-banner').classList.add('show');
+  document.documentElement.style.setProperty('--banner-h', '60px');
+}
+
+function esconderBarraInstalacao() {
+  document.getElementById('install-banner').classList.remove('show');
+  document.documentElement.style.setProperty('--banner-h', '0px');
+}
+
+function fecharBarraInstalacao() {
+  try { localStorage.setItem(BARRA_KEY, String(Date.now())); } catch (e) {}
+  esconderBarraInstalacao();
+}
+
+function instalarPelaBarra() {
+  esconderBarraInstalacao();
+  installApp();
+}
+
+if (!isStandalone() && !barraFechadaRecentemente()) {
+  window.addEventListener('load', () => setTimeout(() => { if (!isStandalone()) mostrarBarraInstalacao(); }, 1000));
+}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
