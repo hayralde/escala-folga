@@ -213,7 +213,7 @@
         <span class="flex-1"><span class="block text-sm font-semibold" style="color:#8D6E2F">RRP Bioenergia</span><span class="block text-xs muted">Site oficial • Etanol de milho • Tapurah-MT</span></span>
         <i class="fas fa-arrow-up-right-from-square text-sm" style="color:#8D6E2F"></i>
       </a>
-      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.2.0</span></p>
+      <p class="text-center text-[11px] muted mt-5 tracking-widest uppercase">RRP Bioenergia • Tapurah-MT • <span class="app-version">v2.3.0</span></p>
     </div>
   </div>
 
@@ -429,7 +429,7 @@
     </main>
 
     <footer class="text-center text-[11px] muted pb-6 tracking-widest uppercase" id="app-footer">
-      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.2.0</span>
+      RRP Bioenergia • Escala de Folga • <span class="app-version">v2.3.0</span>
     </footer>
 
     <button id="fab-add" onclick="openUserModal()" class="fab hidden" title="Adicionar colaborador"><i class="fas fa-plus"></i></button>
@@ -508,12 +508,49 @@
     </div>
   </div>
 
+  <!-- Convite para instalar (abre sozinho ao acessar o site, se o app ainda não estiver instalado) -->
+  <div id="modal-pwa" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center modal-backdrop sm:p-4" onclick="if (event.target === this) dispensarConvitePwa()">
+    <div class="sheet" role="dialog" aria-labelledby="pwa-titulo">
+      <div class="sheet-handle sm:hidden"></div>
+      <div class="flex items-center gap-3 mb-4">
+        <img src="icons/icon-192.png" alt="" class="w-14 h-14 rounded-2xl" />
+        <div>
+          <h3 id="pwa-titulo" class="font-display text-xl font-bold text-strong">Instale o app Escala de Folga</h3>
+          <p class="text-xs muted">PWA — Progressive Web App (Aplicativo Web Progressivo)</p>
+        </div>
+      </div>
+      <p class="text-sm muted mb-4">Este site pode ser instalado no seu celular ou computador, direto pelo navegador.</p>
+      <ul class="space-y-3 mb-5">
+        <li class="flex gap-3 items-start">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--surface-2)"><i class="fas fa-bolt" style="color:var(--gold)"></i></span>
+          <span class="text-sm"><strong class="text-strong">Instalação rápida:</strong> é baixado direto pelo navegador, sem passar pela Google Play Store ou Apple App Store.</span>
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--surface-2)"><i class="fas fa-mobile-screen-button" style="color:var(--green-2)"></i></span>
+          <span class="text-sm"><strong class="text-strong">Ícone na tela:</strong> cria um ícone no seu celular ou computador, exatamente como um aplicativo nativo.</span>
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--surface-2)"><i class="fas fa-wifi" style="color:var(--green-2)"></i></span>
+          <span class="text-sm"><strong class="text-strong">Funciona offline:</strong> guarda os dados no seu aparelho para abrir mesmo sem internet.</span>
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--surface-2)"><i class="fas fa-feather" style="color:var(--gold)"></i></span>
+          <span class="text-sm"><strong class="text-strong">Leve:</strong> por ser um site otimizado, ocupa muito menos espaço na memória do que um aplicativo tradicional.</span>
+        </li>
+      </ul>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="dispensarConvitePwa()" class="btn btn-ghost">Agora não</button>
+        <button onclick="instalarPeloConvite()" class="btn btn-primary"><i class="fas fa-download"></i> Instalar agora</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="hidden"></div>
 
 <!-- Ao lançar nova versão, atualize ?v= para o navegador baixar os scripts novos -->
-<script src="app1.js?v=2.2.0"></script>
-<script src="app2.js?v=2.2.0"></script>
-<script src="app3.js?v=2.2.0"></script>
-<script src="pwa.js?v=2.2.0"></script>
+<script src="app1.js?v=2.3.0"></script>
+<script src="app2.js?v=2.3.0"></script>
+<script src="app3.js?v=2.3.0"></script>
+<script src="pwa.js?v=2.3.0"></script>
 </body>
 </html>

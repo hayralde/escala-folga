@@ -4,7 +4,7 @@ Visual RRP Bioenergia (verde agro `#174A2B` + dourado milho `#D4A017`), com modo
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 2.2.0
+**Versão:** 2.3.0
 
 ## Acesso
 
@@ -36,7 +36,7 @@ O portal tem duas equipes com ambientes separados: **Elétrica** e **Casa de For
 
 ## Instalar como app
 
-No Android/Chrome/Edge aparece o botão **Instalar app** (tela de login e cabeçalho). No iPhone: Safari → Compartilhar → **Adicionar à Tela de Início**.
+O portal é um PWA (Progressive Web App). Ao acessar o site, abre uma caixa de diálogo convidando a instalar ("Agora não" esconde por 7 dias). A opção **Instalar app** também fica na tela de login, na tela do colaborador, em Ajustes e no cabeçalho. Onde o navegador permite (Android/Chrome/Edge), abre a instalação dele; no iPhone, mostra o passo a passo (Safari → Compartilhar → **Adicionar à Tela de Início**).
 
 ## Dados
 
