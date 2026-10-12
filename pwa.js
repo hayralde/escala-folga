@@ -67,11 +67,16 @@ const PASSOS_INSTALACAO = {
 
 async function installApp() {
   if (installPrompt) {
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    installPrompt = null;
-    if (outcome === 'accepted') setInstallVisible(false);
-    return;
+    try {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      installPrompt = null;
+      if (outcome === 'accepted') setInstallVisible(false);
+      return;
+    } catch (e) {
+      // O aviso já foi usado (ex.: a pessoa fechou a barra do navegador): mostra o passo a passo
+      installPrompt = null;
+    }
   }
   const passos = PASSOS_INSTALACAO[detectarPlataforma()];
   document.getElementById('install-steps').innerHTML = passos.map((p, i) => `
@@ -90,9 +95,10 @@ function closeInstallModal() {
   m.classList.remove('flex');
 }
 
-// Chrome/Edge/Android: o navegador avisa quando o app pode ser instalado direto
+// Chrome/Edge/Android: o navegador avisa quando o app pode ser instalado.
+// Não chamamos preventDefault(), para o navegador mostrar o aviso padrão dele
+// ("Instalar app" / "Adicionar à tela inicial"); guardamos o evento para os botões.
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
   installPrompt = e;
 });
 
@@ -104,51 +110,6 @@ window.addEventListener('appinstalled', () => {
 });
 
 setInstallVisible(!isStandalone());
-
-// ============================================================
-// CONVITE CLÁSSICO: caixa de diálogo que abre ao acessar o site
-// ============================================================
-// Aparece se o app não estiver instalado; "Agora não" esconde por 7 dias.
-const CONVITE_KEY = 'ef_pwa_convite_dispensado';
-const CONVITE_DIAS = 7;
-
-function conviteDispensadoRecentemente() {
-  try {
-    const t = parseInt(localStorage.getItem(CONVITE_KEY), 10);
-    return t && (Date.now() - t) < CONVITE_DIAS * 86400000;
-  } catch (e) { return false; }
-}
-
-function abrirConvitePwa() {
-  const m = document.getElementById('modal-pwa');
-  m.classList.remove('hidden');
-  m.classList.add('flex');
-}
-
-function fecharConvitePwa() {
-  const m = document.getElementById('modal-pwa');
-  m.classList.add('hidden');
-  m.classList.remove('flex');
-}
-
-function dispensarConvitePwa() {
-  try { localStorage.setItem(CONVITE_KEY, String(Date.now())); } catch (e) {}
-  fecharConvitePwa();
-}
-
-function instalarPeloConvite() {
-  fecharConvitePwa();
-  installApp();
-}
-
-window.addEventListener('appinstalled', fecharConvitePwa);
-
-if (!isStandalone() && !conviteDispensadoRecentemente()) {
-  window.addEventListener('load', () => setTimeout(() => {
-    // Não abre por cima de outra janela (ex.: instruções já abertas)
-    if (!isStandalone() && document.querySelectorAll('.modal-backdrop.flex').length === 0) abrirConvitePwa();
-  }, 1500));
-}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
