@@ -1,4 +1,4 @@
-const APP_VERSION = 'v2.4.0';
+const APP_VERSION = 'v2.4.1';
 
 let saveQueue = Promise.resolve();
 
@@ -157,6 +157,7 @@ function showSection(id) {
   if (el) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === id));
   document.getElementById('fab-add').classList.toggle('hidden', id !== 'admin-usuarios');
+  document.getElementById('main').classList.toggle('wide', id === 'admin-escala');
   window.scrollTo({ top: 0 });
   if (id === 'user-escala') renderUserEscala();
   if (id === 'admin-dashboard') renderDashboard();
@@ -269,7 +270,7 @@ function renderAdminEscala() {
   let th = `<th class="sticky-col col-mat px-3 py-2.5 text-left text-xs whitespace-nowrap">Mat.</th><th class="sticky-col col-nome px-3 py-2.5 text-left text-xs whitespace-nowrap">Colaborador</th>`;
   for (let d = 1; d <= sched.diasNoMes; d++) {
     const hoje = mesKey === mesHoje && d - 1 === idxHoje;
-    th += `<th class="px-1 py-2.5 text-center text-xs min-w-[30px]" ${hoje ? 'style="color:var(--gold)"' : ''}>${String(d).padStart(2, '0')}</th>`;
+    th += `<th class="px-1 py-2.5 text-center text-xs" ${hoje ? 'style="color:var(--gold)"' : ''}>${String(d).padStart(2, '0')}</th>`;
   }
   document.getElementById('admin-table-header').innerHTML = th;
   const sorted = [...DB.users].sort((a, b) => a.nome.localeCompare(b.nome));
