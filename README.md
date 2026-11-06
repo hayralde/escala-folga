@@ -4,7 +4,7 @@ Visual RRP Bioenergia (verde agro `#174A2B` + dourado milho `#D4A017`), com modo
 
 Sistema de gerenciamento de escala de folga — **Elétrica & Cogeração**
 
-**Versão:** 2.4.0
+**Versão:** 2.4.1
 
 ## Acesso
 
